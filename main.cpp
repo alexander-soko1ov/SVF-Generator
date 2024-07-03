@@ -9,6 +9,7 @@ struct Port {
     std::string name;
     std::string direction;
     std::string type;
+    int pin_number;
 };
 
 // Функция для чтения файла .bsd и извлечения данных о портах
@@ -22,6 +23,7 @@ std::vector<Port> readBsdFile(const std::string& filename) {
     
     std::string line;
     std::regex portRegex(R"(\s*(\w+)\s*:\s*(\w+)\s+(\w+);)");
+    
     std::smatch matches;
     bool inPortSection = false;
     
@@ -67,7 +69,7 @@ int main(int argc, char* argv[]) {
     // Чтение файла .bsd
     std::vector<Port> ports = readBsdFile(bsdFilename);
     if (ports.empty()) {
-        std::cerr << "Ошибка при чтении BSD файла или файл пуст" << std::endl;
+        std::cerr << "Ошибка при чтении файла .bsd или файл пуст" << std::endl;
         return 1;
     }
     

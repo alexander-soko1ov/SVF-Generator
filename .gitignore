@@ -1,0 +1,9 @@
+# Игнорировать файл test.cpp
+test.cpp
+
+# Игнорировать исполняемый файл test
+test
+
+#Игнорировать все файлы логов log.txt и log_test.txt
+log.txt
+log_test.txt
