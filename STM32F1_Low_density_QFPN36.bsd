@@ -55,7 +55,7 @@
 	  NRST		: in bit;	-- modification to add COMPLIANCE_PATTERNS
 	  VDDA		: linkage bit;
 	  VSSA		: linkage bit;
-	  VDD		: linkage bit_vector(1 to 3);
+     VDD		: linkage bit_vector(1 to 3);
 	  VSS		: linkage bit_vector(1 to 3)
 
 	);

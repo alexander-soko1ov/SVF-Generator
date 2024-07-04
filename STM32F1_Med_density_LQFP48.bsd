@@ -82,9 +82,11 @@
 	  VDDA		: linkage bit;
 	  VSSA		: linkage bit;
 	  VBAT		: linkage bit;
-	  VDD		: linkage bit_vector(1 to 4);
+	  
+     VSS		: linkage bit_vector(1 to 4)
+     
+     VDD		: linkage bit_vector(1 to 4);
 	  VSS		: linkage bit_vector(1 to 4)
-
 	);
 	
 	
