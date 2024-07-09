@@ -1,0 +1,3 @@
+/home/alexander/practice-in-the-Module/build/CMakeFiles/main.dir
+/home/alexander/practice-in-the-Module/build/CMakeFiles/edit_cache.dir
+/home/alexander/practice-in-the-Module/build/CMakeFiles/rebuild_cache.dir

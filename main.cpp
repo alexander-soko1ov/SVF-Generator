@@ -5,6 +5,7 @@
 #include <regex>
 #include <unordered_map>
 
+
 // Структура для хранения информации о пине
 struct PinInfo {
     int cellNumber;
