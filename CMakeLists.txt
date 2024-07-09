@@ -10,9 +10,5 @@ project (parctic CXX)
 
 add_compile_options(-Wall -Wextra -std=c++20 )
 
-# add_library(common STATIC lib/common/src/common.cpp)
-# target_include_directories(common PUBLIC lib/common/include)
-
 add_executable(main main.cpp)
 target_compile_options(main PRIVATE -g3)
-# target_link_libraries(main common)
