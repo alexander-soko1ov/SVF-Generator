@@ -8,7 +8,7 @@ endif()
 
 project (parctic CXX)
 
-add_compile_options(-Wall -Wextra -std=c++20)
+add_compile_options(-Wall -Wextra -std=c++20 )
 
 # add_library(common STATIC lib/common/src/common.cpp)
 # target_include_directories(common PUBLIC lib/common/include)
