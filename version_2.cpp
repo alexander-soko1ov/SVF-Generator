@@ -6,10 +6,10 @@
 // Структура для токенов и данных
 struct Token {
     enum class TokenType {
-    IDENTIFIER,
-    NUMBER,
-    COMMENT,
-    END_OF_FILE
+        IDENTIFIER,
+        NUMBER,
+        COMMENT,
+        END_OF_FILE
     };
 
     TokenType type;
@@ -53,11 +53,14 @@ private:
     // Функция для получения следующего символа из потока
     char getNextChar() {
         char c;
-        if (buffer.get(c)) {
-            return c;
-        } else {
-            return input.get();
-        }
+        do {
+            if (buffer.get(c)) {
+                c = removeUnwantedChars(c);
+            } else {
+                c = removeUnwantedChars(input.get());
+            }
+        } while (c == '\0'); // Повторяем, пока не найдем подходящий символ
+        return c;
     }
 
     // Функция для возврата символа в поток
@@ -74,6 +77,14 @@ private:
         if (c == '\n') {
             putBackChar(c); // Возвращаем символ новой строки в поток
         }
+    }
+
+    // Функция для удаления нежелательных символов
+    char removeUnwantedChars(char c) {
+        if (c == '"' || c == '&' || c == ':' || c == ',' || c == ';') {
+            return '\0'; // Возвращаем '\0' для удаления символа
+        }
+        return c; // Возвращаем оригинальный символ
     }
 };
 
