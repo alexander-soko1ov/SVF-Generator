@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 // Структура для хранения информации о порте и ячейках
-struct pins {
+struct PinInfo {
     enum class StatePin { // enum class StatePin : unsigned char (явное определение типа данных)
         high, 
         low,
@@ -20,30 +20,15 @@ struct pins {
     unsigned int In;       // номер ячейки ввода
     unsigned int Out;      // номер ячейки вывода
     unsigned int Config;   // ячейка управления
-    std::string function;  // <function> ячейки boundary scan  
+    // std::string cellType;  // тип ячейки BS
+    std::string function;  // <function> ячейки BS
     bool turnOff;          // при каком значении в ячейки происходит отключение драйвера 1 или 0
-    StatePin stateOff;     // состояние выходного отключенного драйвера z, 1 (high), 0 (low)
-    StatePin stateSafe;    // безопасное значение ячейки X, 1 (high), 0 (low)
-};
-
-// Структура для хранения информации о пине
-struct PinInfo {
-    std::string pin;
-    std::string label;
-    std::string pin_type;
-
-    unsigned int In;       // номер ячейки ввода
-    unsigned int Out;      // номер ячейки вывода
-    unsigned int Config; 
-
-    // std::string cellType;
-    std::string function;
-    // std::string controlCellNumber;
     
-    bool disableValue;
-    
-    std::string stateOff;
-    std::string safeState;
+    std::string stateOff;  // состояние выходного отключенного драйвера z, 1 (high), 0 (low)
+    std::string safeState; // безопасное значение ячейки X, 1 (high), 0 (low)
+
+    // StatePin stateOff;     // состояние выходного отключенного драйвера z, 1 (high), 0 (low)
+    // StatePin stateSafe;    // безопасное значение ячейки X, 1 (high), 0 (low)
 };
 
 // Функция для преобразования str в bool
@@ -53,12 +38,12 @@ bool stringToBool(const std::string& str) {
 }
 
 // Функция для преобразования str в enum 
-std::string stringToEnum(pins::StatePin StatePin) {
+std::string stringToEnum(PinInfo::StatePin StatePin) {
     switch(StatePin) {
-        case pins::StatePin::high : return "1";
-        case pins::StatePin::low : return "0";
-        case pins::StatePin::z : return "z";
-        case pins::StatePin::x : return "x";
+        case PinInfo::StatePin::high : return "1";
+        case PinInfo::StatePin::low : return "0";
+        case PinInfo::StatePin::z : return "z";
+        case PinInfo::StatePin::x : return "x";
         default: return "UNKNOWN";
     }
 }
@@ -85,7 +70,7 @@ PinInfo parsePinInfo(const std::string& line) {
         pinInfo.function = match[4].str();
         pinInfo.safeState = match[5].str();
         // pinInfo.controlCellNumber = match[6].str();
-        match[7].str().empty() ? pinInfo.disableValue = 0 : pinInfo.disableValue = stringToBool(match[7].str()); 
+        match[7].str().empty() ? pinInfo.turnOff = 0 : pinInfo.turnOff = stringToBool(match[7].str()); 
         // может лучше сделать вместо bool str, чтобы можно было выводить N/A для отдельных ячеек
 
         pinInfo.stateOff = match[8].str();
@@ -196,7 +181,7 @@ int main(int argc, char* argv[]) {
                 << ", Cell In: " << pin.In
                 << ", Cell Out: " << pin.Out
                 << ", Cell Config: " << pin.Config
-                << ", Disable Value: " << pin.disableValue
+                << ", Disable Value: " << pin.turnOff
                 << ", Safe State: " << (pin.safeState.empty() ? "N/A" : pin.safeState)
                 << ", State Off: " << (pin.stateOff.empty() ? "N/A" : pin.stateOff)
                 << std::endl;
