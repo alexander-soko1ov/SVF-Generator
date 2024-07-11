@@ -77,11 +77,11 @@ PinInfo parsePinInfo(const std::string& line) {
 
         if (match[4].str() == "INPUT") {
             pinInfo.In = std::stoi(match[1].str());
-            match[6].str().empty() ? 0 : pinInfo.Config = std::stoi(match[6].str());
+            match[6].str().empty() ?  pinInfo.Config = 0 : pinInfo.Config = std::stoi(match[6].str());
             pinInfo.Out = 0;
         } else if (match[4].str() == "OUTPUT3") {
             pinInfo.Out = std::stoi(match[1].str());
-            match[6].str().empty() ? 0 : pinInfo.Config = std::stoi(match[6].str());
+            match[6].str().empty() ? pinInfo.Config = 0 : pinInfo.Config = std::stoi(match[6].str());
             pinInfo.In = 0;
         } else {
             pinInfo.In = 0; pinInfo.Out = 0; pinInfo.Config = 0;
@@ -143,14 +143,17 @@ std::vector<PinInfo> parseBSDFile(const std::string& content) {
 
 // Основная функция
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
+    if (argc < 2) {
         std::cerr << "Добавьте в качестве аргументов необходимый файл .bsd и флаг all или non" << std::endl;
         return 1;
     }
-
+   
     std::string filename = argv[1];
-    std::string flag = argv[2];
-       
+    
+    std::string flag = "non";
+    // std::string flag = argv[2];
+    
+
     std::string content = readFile(filename);
     std::vector<PinInfo> pins = parseBSDFile(content);
     std::unordered_map<std::string, std::string> pinMap = parsePinMap(content);
