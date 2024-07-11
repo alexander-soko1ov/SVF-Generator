@@ -10,5 +10,5 @@ project (parctic CXX)
 
 add_compile_options(-Wall -Wextra -std=c++20 )
 
-add_executable(main main.cpp)
-target_compile_options(main PRIVATE -g3)
+add_executable(version_1 version_1.cpp)
+target_compile_options(version_1 PRIVATE -g3)

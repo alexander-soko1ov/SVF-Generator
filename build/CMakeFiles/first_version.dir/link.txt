@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/first_version.dir/first_version.cpp.o -o first_version 

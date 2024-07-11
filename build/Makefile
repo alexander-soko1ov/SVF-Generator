@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named main
+# Target rules for targets named version_1
 
 # Build rule for target.
-main: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 main
-.PHONY : main
+version_1: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 version_1
+.PHONY : version_1
 
 # fast build rule for target.
-main/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
-.PHONY : main/fast
+version_1/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/version_1.dir/build.make CMakeFiles/version_1.dir/build
+.PHONY : version_1/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
+version_1.o: version_1.cpp.o
+.PHONY : version_1.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.o
-.PHONY : main.cpp.o
+version_1.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/version_1.dir/build.make CMakeFiles/version_1.dir/version_1.cpp.o
+.PHONY : version_1.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+version_1.i: version_1.cpp.i
+.PHONY : version_1.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.i
-.PHONY : main.cpp.i
+version_1.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/version_1.dir/build.make CMakeFiles/version_1.dir/version_1.cpp.i
+.PHONY : version_1.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+version_1.s: version_1.cpp.s
+.PHONY : version_1.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.s
-.PHONY : main.cpp.s
+version_1.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/version_1.dir/build.make CMakeFiles/version_1.dir/version_1.cpp.s
+.PHONY : version_1.cpp.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... main"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... version_1"
+	@echo "... version_1.o"
+	@echo "... version_1.i"
+	@echo "... version_1.s"
 .PHONY : help
 
 
