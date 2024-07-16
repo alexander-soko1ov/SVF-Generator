@@ -54,7 +54,13 @@
         "typeinfo": "cpp",
         "cinttypes": "cpp",
         "variant": "cpp",
-        "*.txt": "c"
+        "*.txt": "c",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "forward_list": "cpp",
+        "ratio": "cpp",
+        "iomanip": "cpp",
+        "valarray": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
     
