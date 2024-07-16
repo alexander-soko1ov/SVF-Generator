@@ -15,6 +15,3 @@ test_5
 # Игнорировать все файлы логов
 log_main.txt
 log_test.txt
-
-# Игнорировать файлы json
-output.json
