@@ -7,7 +7,7 @@
 
 // Структура для хранения информации о порте и ячейках
 struct PinInfo {
-    enum class StatePin { // enum class StatePin : unsigned char (явное определение типа данных)
+    enum class StatePin {
         high, 
         low,
         z,
@@ -26,15 +26,12 @@ struct PinInfo {
     std::string stateOff;  // состояние выходного отключенного драйвера z, 1 (high), 0 (low)
     std::string safeState; // безопасное значение ячейки X, 1 (high), 0 (low)
     
-    void f () {} // метод может быть вызван для не const объекта
-    void f () const {} // метод может быть вызван только для const объекта
+    // void f () {} // метод может быть вызван для не const объекта
+    // void f () const {} // метод может быть вызван только для const объекта
 };
 
 // Функция для преобразования str в bool
 bool stringToBool(const std::string& str);
-
-// Функция для преобразования str в enum 
-// std::string stringToEnum(PinInfo::StatePin StatePin);
 
 // Функция для чтения файла и возврата его содержимого в виде строки
 std::string readFile(const std::string& filename);

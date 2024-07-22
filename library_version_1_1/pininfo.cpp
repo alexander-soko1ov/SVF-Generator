@@ -1,47 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <string>
+#include <unordered_map>
 
 #include "pininfo.hpp"
-
-// Структура для хранения информации о порте и ячейках
-struct PinInfo {
-    enum class StatePin { // enum class StatePin : unsigned char (явное определение типа данных)
-        high, 
-        low,
-        z,
-        x
-    };
-
-    std::string pin;       // номер физического пина, 0 для не выведенных пинов
-    std::string label;     // название физического пина
-    std::string pin_type;  // тип ячейки in, out, inout
-    unsigned int In;       // номер ячейки ввода
-    unsigned int Out;      // номер ячейки вывода
-    unsigned int Config;   // ячейка управления
-    std::string function;  // <function> ячейки BS
-    bool turnOff;          // при каком значении в ячейки происходит отключение драйвера 1 или 0
-    
-    std::string stateOff;  // состояние выходного отключенного драйвера z, 1 (high), 0 (low)
-    std::string safeState; // безопасное значение ячейки X, 1 (high), 0 (low)
-};
 
 // Функция для преобразования str в bool
 bool stringToBool(const std::string& str) {
     int value = std::stoi(str);
     return value != 0;
 }
-
-// Функция для преобразования str в enum 
-// std::string stringToEnum(PinInfo::StatePin StatePin) {
-//     switch(StatePin) {
-//         case PinInfo::StatePin::high : return "1";
-//         case PinInfo::StatePin::low : return "0";
-//         case PinInfo::StatePin::z : return "z";
-//         case PinInfo::StatePin::x : return "x";
-//         default: return "UNKNOWN";
-//     }
-// }
 
 // Функция для чтения файла и возврата его содержимого в виде строки
 std::string readFile(const std::string& filename) {
@@ -153,7 +122,8 @@ std::vector<PinInfo> removeDuplicatePins(const std::vector<PinInfo>& pins) {
 }
 
 // Функция для установки связи номеров пинов и их типов
-void mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unordered_map<std::string, std::string>& pinMap, const std::unordered_map<std::string, std::string>& pinTypes) {
+void mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unordered_map<std::string, 
+    std::string>& pinMap, const std::unordered_map<std::string, std::string>& pinTypes) {
     for (auto& pin : pins) {
         if (pinMap.find(pin.label) != pinMap.end()) {
             pin.pin = pinMap.at(pin.label);
