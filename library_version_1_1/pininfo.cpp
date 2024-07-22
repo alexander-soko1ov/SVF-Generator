@@ -1,9 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <vector>
 #include <regex>
-#include <unordered_map>
+
+#include "pininfo.hpp"
 
 // Структура для хранения информации о порте и ячейках
 struct PinInfo {
@@ -34,15 +33,15 @@ bool stringToBool(const std::string& str) {
 }
 
 // Функция для преобразования str в enum 
-std::string stringToEnum(PinInfo::StatePin StatePin) {
-    switch(StatePin) {
-        case PinInfo::StatePin::high : return "1";
-        case PinInfo::StatePin::low : return "0";
-        case PinInfo::StatePin::z : return "z";
-        case PinInfo::StatePin::x : return "x";
-        default: return "UNKNOWN";
-    }
-}
+// std::string stringToEnum(PinInfo::StatePin StatePin) {
+//     switch(StatePin) {
+//         case PinInfo::StatePin::high : return "1";
+//         case PinInfo::StatePin::low : return "0";
+//         case PinInfo::StatePin::z : return "z";
+//         case PinInfo::StatePin::x : return "x";
+//         default: return "UNKNOWN";
+//     }
+// }
 
 // Функция для чтения файла и возврата его содержимого в виде строки
 std::string readFile(const std::string& filename) {
@@ -185,44 +184,4 @@ void printPinInfo(const std::vector<PinInfo>& pins) {
             << ", State Off: " << (pin.stateOff.empty() ? "N/A" : pin.stateOff)
             << std::endl;
 }
-}
-
-// Основная функция
-int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        // std::cerr << "Добавьте в качестве аргументов необходимый файл .bsd и флаг all или non" << std::endl;
-        std::cerr << "Usage: " << argv[0] << " <bsd-file> [<all|non>]" << std::endl;
-        return 1;
-    }
-    
-    // Получаем имя файла
-    std::string filename = argv[1];
-
-    // Можем использовать дополнительный флаг для включения/выключения печати доп. данных о пинах (частично вырезан)
-    // std::string flag = (argc > 2) ? argv[2] : "non";
-
-    // В один метод для чтения и создания объекта 
-        // Читаем данные из файла и записываем в переменную content
-        std::string content = readFile(filename);
-
-        // Получаем даныне о пинах и заносим данные в переменную ping (vector)
-        std::vector<PinInfo> pins = parseBSDFile(content);
-
-        // Получаем данные об имени пина и его номере
-        std::unordered_map<std::string, std::string> pinMap = parsePinMap(content);
-        
-        // Получаем данные об имени пина и его типе
-        std::unordered_map<std::string, std::string> pinTypes = parsePinTypes(content);
-    
-
-    // Устанавливаем связь номеров пинов и их типов
-    mapPinNumbersAndTypes(pins, pinMap, pinTypes);
-
-    // Удаляем дублирующиеся пины
-    pins = removeDuplicatePins(pins);
-
-    // Выводим информацию о пинах
-    printPinInfo(pins);
-
-    return 0;
 }
