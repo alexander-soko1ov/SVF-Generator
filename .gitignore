@@ -4,6 +4,8 @@ test_2.cpp
 test_3.cpp
 test_4.cpp
 test_5.cpp
+test_6.cpp
+test_7.cpp
 
 # Игнорировать исполняемые файлы тестов
 test
@@ -11,7 +13,12 @@ test_2
 test_3
 test_4
 test_5
+test_6
+test_7
 
 # Игнорировать все файлы логов
 log_main.txt
 log_test.txt
+
+# Игнорировать тестовый файл bsd
+test.bsd
