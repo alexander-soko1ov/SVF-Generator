@@ -8,7 +8,7 @@
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Добавьте в качестве аргументов необходимый файл .bsd и флаг all или non" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <bsd-file> " << std::endl;
         return 1;
     }
     
