@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 // Структура для хранения информации о порте и ячейках
-struct PinInfo {
+class PinInfo {
     enum class StatePin { // enum class StatePin : unsigned char (явное определение типа данных)
         high, 
         low,

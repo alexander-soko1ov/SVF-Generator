@@ -6,14 +6,14 @@
 
 #include "pininfo.hpp"
 
-// Функция для преобразования str в bool
-bool stringToBool(const std::string& str) {
+// Функция для преобразования str в bool 
+bool BsdlPins::stringToBool(const std::string& str) {
     int value = std::stoi(str);
     return value != 0;
 }
 
 // Функция для чтения файла и возврата его содержимого в виде строки
-std::string readFile(const std::string& filename) {
+std::string BsdlPins::readFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -22,7 +22,7 @@ std::string readFile(const std::string& filename) {
 }
 
 // Функция для парсинга строки с описанием пина
-PinInfo parsePinInfo(const std::string& line) {
+BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
     std::regex pinRegex(R"(\s*(\d+)\s*\((\w+),\s*(\S*),\s*(\w+),?\s*(\w*),?\s*(\S*),?\s*(\w*).\s*(\w*))"); 
     std::smatch match;
 
@@ -51,7 +51,7 @@ PinInfo parsePinInfo(const std::string& line) {
 }
 
 // Функция для парсинга строк с номерами пинов
-std::unordered_map<std::string, std::string> parsePinMap(const std::string& content) {
+std::unordered_map<std::string, std::string> BsdlPins::parsePinMap(const std::string& content) {
     std::unordered_map<std::string, std::string> pinMap;
     std::regex pinEntryRegex(R"(\s*(\w+)\s*:\s*(\d+),)");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), pinEntryRegex);
@@ -68,7 +68,7 @@ std::unordered_map<std::string, std::string> parsePinMap(const std::string& cont
 }
 
 // Функция для парсинга строк с типами пинов
-std::unordered_map<std::string, std::string> parsePinTypes(const std::string& content) {
+std::unordered_map<std::string, std::string> BsdlPins::parsePinTypes(const std::string& content) {
     std::unordered_map<std::string, std::string> pinTypes;
     std::regex pinTypeRegex(R"(\s*(\w+)\s*:\s*(\w+)\s*(\w*);)");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), pinTypeRegex);
@@ -85,7 +85,7 @@ std::unordered_map<std::string, std::string> parsePinTypes(const std::string& co
 }
 
 // Функция для парсинга файла .bsd и извлечения информации о пинах
-std::vector<PinInfo> parseBSDFile(const std::string& content) {
+std::vector<BsdlPins::PinInfo> BsdlPins::parseBSDFile(const std::string& content) {
     std::vector<PinInfo> pins;
     std::regex lineRegex(R"((\d+\s*\(BC_\d+,.*\)))");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), lineRegex);
@@ -101,7 +101,7 @@ std::vector<PinInfo> parseBSDFile(const std::string& content) {
 }
 
 // Функция для удаления дублирующихся пинов и переноса значения Cell In из дубликата в первый пин
-std::vector<PinInfo> removeDuplicatePins(const std::vector<PinInfo>& pins) {
+std::vector<BsdlPins::PinInfo> BsdlPins::removeDuplicatePins(const std::vector<PinInfo>& pins) {
     std::unordered_map<std::string, PinInfo> pinMap;
     for (const auto& pin : pins) {
         if (pinMap.find(pin.pin) == pinMap.end()) {
@@ -122,7 +122,7 @@ std::vector<PinInfo> removeDuplicatePins(const std::vector<PinInfo>& pins) {
 }
 
 // Функция для установки связи номеров пинов и их типов
-void mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unordered_map<std::string, 
+void BsdlPins::mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unordered_map<std::string, 
     std::string>& pinMap, const std::unordered_map<std::string, std::string>& pinTypes) {
     for (auto& pin : pins) {
         if (pinMap.find(pin.label) != pinMap.end()) {
@@ -139,10 +139,11 @@ void mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unordered_map<
     }
 }
 
+
 // Функция для вывода информации о пинах
-void printPinInfo(const std::vector<PinInfo>& pins) {
+void BsdlPins::printPinInfo(std::ostream &os) { 
     for (const auto& pin : pins) {
-        std::cout << "Pin: " << pin.pin 
+        os << "Pin: " << pin.pin 
             << ", Port Name: " << (pin.label.empty() ? "*" : pin.label) // condition ? true_value : false_value
             << ", Pin type: " << pin.pin_type
             << ", Function: " << pin.function 
@@ -153,5 +154,5 @@ void printPinInfo(const std::vector<PinInfo>& pins) {
             << ", Safe State: " << (pin.safeState.empty() ? "N/A" : pin.safeState)
             << ", State Off: " << (pin.stateOff.empty() ? "N/A" : pin.stateOff)
             << std::endl;
-}
+    }
 }
