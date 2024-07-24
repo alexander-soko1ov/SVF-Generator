@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/alexander/practice-in-the-Module/build",
-  "command": "/usr/bin/c++   -g -Wall -Wextra -std=c++20 -g3 -o CMakeFiles/version_1.dir/version_1.cpp.o -c /home/alexander/practice-in-the-Module/version_1.cpp",
-  "file": "/home/alexander/practice-in-the-Module/version_1.cpp"
-}
-]

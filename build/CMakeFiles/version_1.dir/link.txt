@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/version_1.dir/version_1.cpp.o -o version_1 
