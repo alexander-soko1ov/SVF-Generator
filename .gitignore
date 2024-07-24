@@ -1,3 +1,6 @@
+# Игнорировать тест библиотеки
+build/
+
 # Игнорировать исходные файлы тестов
 test.cpp
 test_2.cpp
@@ -22,4 +25,6 @@ log_test.txt
 test.bsd
 
 # Игнорировать тест библиотеки
-test_library
+test_library/
+
+
