@@ -14,10 +14,13 @@ std::string replaceExtension(const std::string& filename, const std::string& old
 }
 
 // Функция создающая файл и заполняющая его в соотвествии с json
-void createFile(std::string filename_json, std::string statusTRST, char *argv[]){
+void createFile(std::string filename_json, char *argv[]){
     // Создание имени файла с расширением svf
     std::string filename = replaceExtension(filename_json, ".json", ".svf");
     
+    // Инициализация переменной statusTRST
+    std::string statusTRST;
+
     // Открытие файла для записи
     std::ofstream svfFile(filename);
 
@@ -82,10 +85,10 @@ int main(int argc, char* argv[]) {
     std::string filename_json = argv[2];
     
     // Получаем статус линии TRST
-    std::string statusTRST;
+    // std::string statusTRST;
 
     // Создание файла svf
-    createFile(filename_json, statusTRST, argv); 
+    createFile(filename_json, argv); 
     
     return 0;
 }
