@@ -1,6 +1,0 @@
-! Начать программу тестирования
-TRST OFF;
-ENDIR IDLE;
-ENDDR IDLE;
-TIR 5 TDI (00000)
-RUNTEST 100 TCK ENDSTATE IDLE;
