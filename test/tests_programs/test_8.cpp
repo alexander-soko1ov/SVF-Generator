@@ -129,7 +129,7 @@ int main() {
         print_pins(pins);
 
         // Вывод количества пинов для каждого объекта JSON
-        std::cout << "\nКоличество пинов в каждом объекте JSON:" << std::endl;
+        std::cout << "/nКоличество пинов в каждом объекте JSON:" << std::endl;
         for (size_t count : pin_counts) {
             std::cout << count << std::endl;
         }
