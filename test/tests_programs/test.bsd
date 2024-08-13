@@ -1,9 +1,0 @@
-        BOOT0        : in     bit;
-        JTDO         : out    bit;
-        PB7          : inout  bit;
-        NRST         : in     bit;    -- modification to add COMPLIANCE_PATTERNS
-        VDDA         : linkage bit;
-        VDD          : linkage bit_vector(1 to 3);
-        "PA2		: 9," &
-	    "PA3		: 10," &
-	    "PA4		: 11," &
