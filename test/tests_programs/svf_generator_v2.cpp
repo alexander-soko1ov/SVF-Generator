@@ -21,6 +21,35 @@ public:
     StatePin cell_read;
     StatePin cell_write;
 
+    bool svfGen(int argc, char *argv[]){
+        
+        PinJson pin_json;
+
+        std::string filename_json = pin_json.parse_arguments(argc, argv);
+        
+        // Чтение JSON из файла
+        json jfile = pin_json.read_json_file(filename_json);
+
+        // Вектор для хранения количества пинов
+        std::vector<size_t> pin_counts;
+
+        // Обработка JSON и получение данных
+        std::vector<PinJson> pins = pin_json.process_json(jfile, pin_counts);
+
+        // Вывод результата для проверки
+        pin_json.print_pins(pins);
+
+        // Вывод количества пинов для каждого объекта JSON
+        std::cout << "\nКоличество пинов в каждом объекте JSON:" << std::endl;
+        for (size_t count : pin_counts) {
+            std::cout << count << std::endl;
+        }
+
+        return 0;
+    }
+
+private:
+    // Приватные методы управляемые методом svfGen
     // Функция для преобразования строки в значение StatePin
     static StatePin string_to_statepin(const std::string& value) {
         if (value == "1" || value == "high") {
@@ -47,10 +76,11 @@ public:
         }
     }
 
+
+    // Методы и переменные для работы с getopt
     std::string filename_bsd = "NO FILE";
     std::string filename_json = "NO FILE";
 
-    // Методы для работы с getopt
     // Функция для печати справки
     void print_usage() {
         std::cout << "Usage: program [options]\n"
@@ -128,8 +158,8 @@ public:
             abort();
         }
         
-        std::cout << "BSDL-file: " << filename_bsd << "\n";
-        std::cout << "JSON-file: " << filename_json << "\n";
+        std::cout << "\nBSDL-file: " << filename_bsd << "\n";
+        std::cout << "JSON-file: " << filename_json << "\n\n";
 
         return filename_json;
     }
@@ -205,32 +235,10 @@ public:
 };
 
 
-
 int main(int argc, char *argv[]) {
-        
-    // std::string filename = argv[1];
 
     PinJson pin_json;
 
-    std::string filename_json = pin_json.parse_arguments(argc, argv);
-    
-    // Чтение JSON из файла
-    json jfile = pin_json.read_json_file(filename_json);
+    pin_json.svfGen(argc, argv);
 
-    // Вектор для хранения количества пинов
-    std::vector<size_t> pin_counts;
-
-    // Обработка JSON и получение данных
-    std::vector<PinJson> pins = pin_json.process_json(jfile, pin_counts);
-
-    // Вывод результата для проверки
-    pin_json.print_pins(pins);
-
-    // Вывод количества пинов для каждого объекта JSON
-    std::cout << "\nКоличество пинов в каждом объекте JSON:" << std::endl;
-    for (size_t count : pin_counts) {
-        std::cout << count << std::endl;
-    }
-
-    return 0;
 }
