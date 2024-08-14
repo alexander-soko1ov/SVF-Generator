@@ -20,8 +20,11 @@ int main(int argc, char* argv[]) {
     // Вызываем методы загрузки и обработки bsd
     BsdlPins.loadBsdl(filename);
 
+    // Получаем вектор пинов
+    const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
+
     // Выводим информацию о пинах
-    BsdlPins.printPinInfo();
+    BsdlPins.printPinInfo(pins);
 
     return 0;
 }

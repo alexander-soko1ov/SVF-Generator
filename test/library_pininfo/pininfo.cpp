@@ -21,6 +21,37 @@ std::string BsdlPins::readFile(const std::string& filename) {
     return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 }
 
+// Функция для преобразования строки в StatePin
+BsdlPins::PinInfo::StatePin BsdlPins::PinInfo::stringToStatePin(const std::string& stateStr) {
+    if (stateStr == "1") {
+        return StatePin::high;
+    } else if (stateStr == "0") {
+        return StatePin::low;
+    } else if (stateStr == "Z") {
+        return StatePin::z;
+    } else if (stateStr == "X") {
+        return StatePin::x;
+    }
+    std::cerr << "Ошибка: недопустимое значение строки для StatePin: " << stateStr << std::endl;
+    throw std::invalid_argument("Invalid state pin string: " + stateStr);
+}
+
+// Функция для преобразования StatePin в строку
+std::string BsdlPins::PinInfo::statePinToString(StatePin state) {
+    switch (state) {
+        case StatePin::high:
+            return "high";
+        case StatePin::low:
+            return "low";
+        case StatePin::z:
+            return "z";
+        case StatePin::x:
+            return "x";
+        default:
+            return "unknown";
+    }
+}
+
 // Функция для парсинга строки с описанием пина
 BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
     std::regex pinRegex(R"(\s*(\d+)\s*\((\w+),\s*(\S*),\s*(\w+),?\s*(\w*),?\s*(\S*),?\s*(\w*).\s*(\w*))"); 
@@ -30,17 +61,19 @@ BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
     if (std::regex_search(line, match, pinRegex)) {
         pinInfo.label = match[3].str();
         pinInfo.function = match[4].str();
-        pinInfo.safeState = match[5].str();
+        match[5].str().empty() ? pinInfo.safeState : pinInfo.safeState = PinInfo::stringToStatePin(match[5].str()); 
         match[7].str().empty() ? pinInfo.turnOff = 0 : pinInfo.turnOff = stringToBool(match[7].str()); 
-        pinInfo.stateOff = match[8].str();
+        match[8].str().empty() ? pinInfo.stateOff : pinInfo.stateOff = PinInfo::stringToStatePin(match[8].str()); 
 
         if (match[4].str() == "INPUT") {
             pinInfo.In = std::stoi(match[1].str());
             match[6].str().empty() ?  pinInfo.Config = 0 : pinInfo.Config = std::stoi(match[6].str());
+            match[7].str().empty() ?  pinInfo.turnOff = 0 : pinInfo.turnOff = std::stoi(match[7].str());
             pinInfo.Out = 0;
         } else if (match[4].str() == "OUTPUT3") {
             pinInfo.Out = std::stoi(match[1].str());
             match[6].str().empty() ? pinInfo.Config = 0 : pinInfo.Config = std::stoi(match[6].str());
+            match[7].str().empty() ?  pinInfo.turnOff = 0 : pinInfo.turnOff = std::stoi(match[7].str());
             pinInfo.In = 0;
         } else {
             pinInfo.In = 0; pinInfo.Out = 0; pinInfo.Config = 0;
@@ -141,9 +174,10 @@ void BsdlPins::mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unor
 
 
 // Функция для вывода информации о пинах
-void BsdlPins::printPinInfo(std::ostream &os) { 
+// void BsdlPins::printPinInfo(std::ostream &os) { 
+void BsdlPins::printPinInfo(const std::vector<BsdlPins::PinInfo>& pins) const { 
     for (const auto& pin : pins) {
-        os << "Pin: " << pin.pin 
+        std::cout << "Pin: " << pin.pin 
             << ", Port Name: " << (pin.label.empty() ? "*" : pin.label) // condition ? true_value : false_value
             << ", Pin type: " << pin.pin_type
             << ", Function: " << pin.function 
@@ -151,8 +185,8 @@ void BsdlPins::printPinInfo(std::ostream &os) {
             << ", Cell Out: " << pin.Out
             << ", Cell Config: " << pin.Config
             << ", Disable Value: " << pin.turnOff
-            << ", Safe State: " << (pin.safeState.empty() ? "N/A" : pin.safeState)
-            << ", State Off: " << (pin.stateOff.empty() ? "N/A" : pin.stateOff)
+            << ", Safe State: " << PinInfo::statePinToString(pin.safeState)
+            << ", State Off: " << PinInfo::statePinToString(pin.stateOff)
             << std::endl;
     }
 }

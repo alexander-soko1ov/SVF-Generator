@@ -5,7 +5,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
-// Подключаем пространство имен для удобства
+// Подключаем пространство имен nlohmann/json
 using json = nlohmann::json;
 
 class PinJson {
@@ -25,7 +25,10 @@ public:
         
         PinJson pin_json;
 
-        std::string filename_json = pin_json.parse_arguments(argc, argv);
+        std::vector<std::string> filename = parse_arguments(argc, argv);
+
+        std::string filename_bsdl = filename[0];
+        std::string filename_json = filename[1]; 
         
         // Чтение JSON из файла
         json jfile = pin_json.read_json_file(filename_json);
@@ -78,7 +81,7 @@ private:
 
 
     // Методы и переменные для работы с getopt
-    std::string filename_bsd = "NO FILE";
+    std::string filename_bsdl = "NO FILE";
     std::string filename_json = "NO FILE";
 
     // Функция для печати справки
@@ -107,9 +110,9 @@ private:
     }
 
     // Функция для обработки аргументов командной строки
-    std::string parse_arguments(int argc, char *argv[]) {
+    std::vector<std::string> parse_arguments(int argc, char *argv[]) {
         // Состояния по умолчанию
-        // std::string filename_bsd = "NO FILE";
+        // std::string filename_bsdl = "NO FILE";
         // std::string filename_json = "NO FILE";
         
         int option_index = 0;
@@ -125,8 +128,8 @@ private:
         while ((c = getopt_long(argc, argv, "b:j:h", long_options, &option_index)) != -1) {
             switch (c) {
                 case 'b':
-                    filename_bsd = optarg;
-                    if (!has_extension(filename_bsd, ".bsdl") && !has_extension(filename_bsd, ".bsd")) {
+                    filename_bsdl = optarg;
+                    if (!has_extension(filename_bsdl, ".bsdl") && !has_extension(filename_bsdl, ".bsd")) {
                         std::cerr << "Неверное расширение BSDL-файла. Доступные расширения: bsdl или bsd\n";
                         abort();
                     }
@@ -140,17 +143,17 @@ private:
                     break;
                 case 'h':
                     print_usage();
-                    return 0;
+                    break;
                 default:
                     abort();
             }
         }
 
         // Вывод записанных аргументов
-        if((filename_bsd == "NO FILE") && (filename_json == "NO FILE")){
+        if((filename_bsdl == "NO FILE") && (filename_json == "NO FILE")){
             std::cout << "Необходимо указать имя BSDL-файла и JSON-файла" << std::endl;
             abort();
-        } else if (filename_bsd == "NO FILE"){
+        } else if (filename_bsdl == "NO FILE"){
             std::cout << "Ещё необходимо указать имя BSDL-файла" << std::endl;
             abort();
         } else if (filename_json == "NO FILE"){
@@ -158,10 +161,12 @@ private:
             abort();
         }
         
-        std::cout << "\nBSDL-file: " << filename_bsd << "\n";
+        std::cout << "\nBSDL-file: " << filename_bsdl << "\n";
         std::cout << "JSON-file: " << filename_json << "\n\n";
+        
+        std::vector<std::string> filename = {filename_bsdl, filename_json};
 
-        return filename_json;
+        return filename;
     }
 
 
@@ -234,11 +239,10 @@ private:
     }
 };
 
-
 int main(int argc, char *argv[]) {
 
-    PinJson pin_json;
+    PinJson PinJson;
 
-    pin_json.svfGen(argc, argv);
+    PinJson.svfGen(argc, argv);
 
 }

@@ -26,10 +26,20 @@ public:
         std::string function;  // <function> ячейки BS
         bool turnOff;          // при каком значении в ячейки происходит отключение драйвера 1 или 0
         
-        std::string stateOff;  // состояние выходного отключенного драйвера z, 1 (high), 0 (low)
-        std::string safeState; // безопасное значение ячейки X, 1 (high), 0 (low)
+        StatePin stateOff;  // состояние выходного отключенного драйвера z, 1 (high), 0 (low)
+        StatePin safeState; // безопасное значение ячейки X, 1 (high), 0 (low)
 
+        // Метод для преобразования строки в StatePin
+        static StatePin stringToStatePin(const std::string& str);
+
+        // Метод для преобразования StatePin в строку
+        static std::string statePinToString(StatePin state);
     };
+
+    // Метод для получения вектора пинов
+    const std::vector<PinInfo>& getPins() const {
+        return pins;
+    }
     
     void loadBsdl(std::string filename){
     
@@ -53,7 +63,8 @@ public:
 
     }
     // Функция для вывода информации о пинах
-    void printPinInfo(std::ostream &os=std::cout);
+    // void printPinInfo(std::ostream &os=std::cout);
+    void printPinInfo(const std::vector<BsdlPins::PinInfo>& pins) const;
 
 protected:
     // Защищенные методы для выполнения операций
