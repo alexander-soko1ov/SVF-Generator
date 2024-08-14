@@ -266,34 +266,34 @@ void PinJson::createFile(std::string& filename_json){
     std::ofstream svfFile(filename_svf);
     
     // Запись данных в файл (длина регистра 5 bit для STM32F1)
-    svfFile << "! Начать программу тестирования\n";
-    //             "TRST " << trst_state << ";\n";
+    svfFile << "! Начать программу тестирования\n"
+                "TRST " << trst_state << ";\n";
 
-    // svfFile << "ENDIR "<< endir_state << ";\n";
+    svfFile << "ENDIR "<< endir_state << ";\n";
     
-    // svfFile << "ENDDR "<< enddr_state << ";\n";
+    svfFile << "ENDDR "<< enddr_state << ";\n";
 
-    // unsigned int count = 1;
+    unsigned int count = 1;
 
-    // unsigned int instr_len = 5;
+    unsigned int instr_len = 5;
 
-    // std::string EXTEST = "00000";
+    std::string EXTEST = "00000";
 
-    // unsigned int bound_len = 139;
+    unsigned int bound_len = 139;
     
-    // std::vector<char> pin_tdi(bound_len, 0);
+    std::vector<char> pin_tdi(bound_len, 0);
     
-    // std::vector<char> pin_tdo(bound_len, 0);
+    std::vector<char> pin_tdo(bound_len, 0);
 
-    // std::vector<char> pin_mask(bound_len, 0);
+    std::vector<char> pin_mask(bound_len, 0);
     
-    // for(int i = 0; i < count; i++){
-    //     svfFile << "TIR " << instr_len << " TDI (" << EXTEST << ")\n";
+    for(unsigned int i = 0; i < count; i++){
+        svfFile << "TIR " << instr_len << " TDI (" << EXTEST << ")\n";
 
-    //     // svfFile << "SDR " << bound_len << " TDI " << pin_tdi << " TDO " << pin_tdo << " MASK (" << pin_mask << ");\n";
+        // svfFile << "SDR " << bound_len << " TDI " << pin_tdi << " TDO " << pin_tdo << " MASK (" << pin_mask << ");\n";
         
-    //     svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n"; 
-    // }
+        svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n"; 
+    }
 
     // Закрытие файла
     svfFile.close();
