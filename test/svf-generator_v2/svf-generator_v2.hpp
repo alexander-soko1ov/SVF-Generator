@@ -1,7 +1,7 @@
 #pragma once
-
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <nlohmann/json.hpp>
 
 // Подключаем пространство имен nlohmann/json
@@ -23,22 +23,35 @@ public:
     // Главный метод библиотеки
     bool svfGen(std::string& filename_json);
 
+    // Метод работающий с getopt и парсящий аргументы
     std::vector<std::string> parse_arguments(int argc, char *argv[]);
+
+    // Метод создающий svf файл и заполняющий его данными
+    void createFile(std::string& filename_json);
 
 private:
     // Приватные методы
     static StatePin string_to_statepin(const std::string& value);
     static std::string statepin_to_string(StatePin state);
-    bool is_valid_state(const std::string& state, const std::string valid_states[], size_t count);
-    bool has_extension(const std::string& filename, const std::string& ext);
+    // bool is_valid_state(const std::string& state, const std::string valid_states[], size_t count);
+    // bool has_extension(const std::string& filename, const std::string& ext);
     // std::vector<std::string> parse_arguments(int argc, char *argv[]);
     PinJson::StatePin cell_value(const std::string& value);
     std::vector<PinJson> process_json(const json& jfile, std::vector<size_t>& pin_counts);
     json read_json_file(const std::string& filename);
     void print_pins(const std::vector<PinJson>& pins);
-    void print_usage();
+    // void print_usage();
+
+    std::string replaceExtension(const std::string& filename, const std::string& oldExt, const std::string& newExt);
     
+    void print_usage();
+    bool has_extension(const std::string& filename, const std::unordered_set<std::string>& validExtensions);
+    bool is_valid_state(const std::string& state, const std::string valid_states[], size_t count);
+
     // Член-данные
     std::string filename_bsdl = "NO FILE";
     std::string filename_json = "NO FILE";
+    std::string trst_state = "OFF";
+    std::string endir_state = "IDLE";
+    std::string enddr_state = "IDLE";
 };
