@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "svf-generator_v2.hpp"
+#include "pininfo.hpp"
 
 using json = nlohmann::json;
 
@@ -21,13 +22,13 @@ bool PinJson::svfGen(std::string& filename_json){
     std::vector<PinJson> pins = pin_json.process_json(jfile, pin_counts);
 
     // Вывод результата для проверки
-    pin_json.print_pins(pins);
+    pin_json.print_pins(pins, pin_counts);
 
     // Вывод количества пинов для каждого объекта JSON
-    std::cout << "\nКоличество пинов в каждом объекте JSON:" << std::endl;
-    for (size_t count : pin_counts) {
-        std::cout << count << std::endl;
-    }
+    // std::cout << "\nКоличество пинов в каждом объекте JSON:" << std::endl;
+    // for (size_t count : pin_counts) {
+    //     std::cout << count << std::endl;
+    // }
 
     return 0;
 }
@@ -236,14 +237,18 @@ json PinJson::read_json_file(const std::string& filename) {
 }
 
 // Функция для вывода данных пинов
-void PinJson::print_pins(const std::vector<PinJson>& pins) {
+void PinJson::print_pins(const std::vector<PinJson>& pins, std::vector<size_t> pin_counts) {
     std::cout << "\nДанные записанные в JSON-файле:\n";
 
-    for (const auto& pin : pins) {
-        std::cout << "Pin: " << pin.pin_name 
+    for (size_t i = 0; i < pin_counts.size(); i++) {
+        for(size_t count = 0; count < pin_counts[i]; count ++){
+            const auto& pin = pins[count];
+            std::cout << "Pin: " << pin.pin_name 
                 << ", Read: " << statepin_to_string(pin.cell_read)
                 << ", Write: " << statepin_to_string(pin.cell_write)
-                << std::endl;
+                << std::endl; 
+        }
+        std::cout << std::endl; 
     }
 }
 
@@ -305,8 +310,16 @@ void PinJson::print_conversion(const char* binary_string, char* hex_string) {
     free(hex_string);
 }
 
+// Функция для заполнения строки чередующимися 1 и 0
+void PinJson::fill_binary_string(char* binary_string, size_t length) {
+    for (size_t i = 0; i < length; ++i) {
+        binary_string[i] = '1';
+    }
+    binary_string[length] = '\0';
+}
+
 // Функция создающая файл и заполняющая его в соотвествии с json
-void PinJson::createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr) {
+void PinJson::createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr, const std::vector<BsdlPins::PinInfo>& pins) {
     // Создание имени файла с расширением svf
     std::string filename_svf = PinJson::replaceExtension(filename_json, ".json", ".svf");
 
@@ -321,18 +334,18 @@ void PinJson::createFile(std::string& filename_json, unsigned int& register_leng
     
     svfFile << "ENDDR "<< enddr_state << ";\n";
 
-    size_t count = 1;
-
-    std::string EXTEST = "00000";
+    std::string EXTEST = "00000";  // заглушка, пока что не парсил из файла
     
-    for(unsigned int i = 0; i < count; i++){
+    for(unsigned int i = 0; i < pin_counts.size(); i++){
         svfFile << "TIR " << register_length_instr << " TDI (" << EXTEST << ")\n";
 
-        svfFile << "длина регистра " << register_length_bsdl << "\n";
+        // char* pin_tdi = genPinTdi();
 
-        // svfFile << "SDR " << bound_len << " TDI " << pin_tdi << " TDO " << pin_tdo << " MASK (" << pin_mask << ");\n";
+        // char* pin_tdo = genPinTdo();
+
+        // svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi << ") TDO (" << pin_tdo << ") MASK (" << pin_mask << ");\n";
         
-        svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n"; 
+        svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n\n"; 
     }
 
     // Закрытие файла

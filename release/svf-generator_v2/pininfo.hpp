@@ -44,7 +44,7 @@ public:
     unsigned int boundary_length(const std::string& filename);
 
     // Метод для парсинга данных о длине регистра инструкций
-    unsigned int instruction_length(const std::string& filename);    
+    unsigned int instruction_length(const std::string& filename);
 
     void loadBsdl(std::string filename){
     

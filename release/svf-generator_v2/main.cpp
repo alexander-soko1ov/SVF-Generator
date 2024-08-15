@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     PinJson.svfGen(filename_json);
 
     // Создаём SVF-файл 
-    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr);
+    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr, pins);
 
     return 0;
 }

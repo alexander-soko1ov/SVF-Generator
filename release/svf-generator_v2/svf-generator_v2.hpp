@@ -5,6 +5,8 @@
 #include <unordered_set>
 #include <nlohmann/json.hpp>
 
+#include "pininfo.hpp"
+
 // Подключаем пространство имен nlohmann/json
 using json = nlohmann::json;
 
@@ -28,7 +30,7 @@ public:
     std::vector<std::string> parse_arguments(int argc, char *argv[]);
 
     // Метод создающий svf файл и заполняющий его данными
-    void createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr);
+    void createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr, const std::vector<BsdlPins::PinInfo>& pins);
 
 private:
     // Приватные методы
@@ -41,7 +43,7 @@ private:
     PinJson::StatePin cell_value(const std::string& value);
     std::vector<PinJson> process_json(const json& jfile, std::vector<size_t>& pin_counts);
     json read_json_file(const std::string& filename);
-    void print_pins(const std::vector<PinJson>& pins);
+    void print_pins(const std::vector<PinJson>& pins, std::vector<size_t> pin_counts);
     // void print_usage();
 
     // Метод замены расширений файлов
@@ -56,6 +58,7 @@ private:
     void to_upper_case(char* str);
     char* convert_binary_to_hex(const char* binary_string);
     void print_conversion(const char* binary_string, char* hex_string);
+    void fill_binary_string(char* binary_string, size_t length);
 
     // Члены класса управления SVF и передачи нужных файлов
     std::string filename_bsdl = "NO FILE";
