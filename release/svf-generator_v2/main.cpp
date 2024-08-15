@@ -1,0 +1,45 @@
+#include <iostream>
+#include <vector>
+
+#include "svf-generator_v2.hpp"
+#include "pininfo.hpp"
+
+
+int main(int argc, char *argv[]) {
+
+    // Создаём экземляры класса
+    PinJson PinJson;
+    BsdlPins BsdlPins;
+
+    // Создаём vector для хранения и передачи имён файлов
+    const std::vector<std::string>& filename = PinJson.parse_arguments(argc, argv);
+
+    // Записываем имена файлов в соответсвующие им переменные
+    std::string filename_bsdl = filename[0];
+    std::string filename_json = filename[1];
+
+    // Загружаем BSDL-файл, парсим его и записываем данные в переменные
+    BsdlPins.loadBsdl(filename_bsdl);
+
+    // Получаем данные о длине регистра BSDL
+    unsigned int register_length_bsdl = BsdlPins.boundary_length(filename_bsdl);
+    // std::cout << "Длина регистра BSDL: " << register_length_bsdl << "\n" << std::endl;
+
+    // Получаем данные о длине регистра BSDL
+    unsigned int register_length_instr = BsdlPins.instruction_length(filename_bsdl);
+    // std::cout << "Длина регистра инструкций: " << register_length_instr << "\n" << std::endl;
+
+    // Получаем вектор пинов
+    const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
+
+    // Выводим информацию о пинах
+    BsdlPins.printPinInfo(pins);
+
+    // Читаем данные из JSON и записываем их в переменные
+    PinJson.svfGen(filename_json);
+
+    // Создаём SVF-файл 
+    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr);
+
+    return 0;
+}
