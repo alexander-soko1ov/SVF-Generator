@@ -111,7 +111,7 @@ std::vector<std::string> PinJson::parse_arguments(int argc, char *argv[]){
     };
 
     // Инициализация доступных состояний аргументов
-    const std::string trst_states[] = {"ON", "OFF", "z", "ABSENT"};
+    const std::string trst_states[] = {"ON", "OFF", "Z", "ABSENT"};
     const std::string endir_enddr_states[] = {"IRPAUSE", "DRPAUSE", "RESET", "IDLE"};
 
     // Цикл проверки всех переданных аргументов
@@ -134,7 +134,7 @@ std::vector<std::string> PinJson::parse_arguments(int argc, char *argv[]){
             case 't':
                 trst_state = optarg;
                 if (!is_valid_state(trst_state, trst_states, 4)) {
-                    std::cerr << "Неверное состояние --trst. Возможные состояния ON, OFF, z, or ABSENT.\n";
+                    std::cerr << "Неверное состояние --trst. Возможные состояния ON, OFF, Z, or ABSENT.\n";
                     abort();
                 }
                 break;
@@ -318,6 +318,21 @@ void PinJson::fill_binary_string(char* binary_string, size_t length) {
     binary_string[length] = '\0';
 }
 
+// Функция генерирующая маску для записи битов в ячейки BS
+char* PinJson::genPinTdi(){
+
+}
+
+// Функция генерирующая маску для чтения битов в ячейки BS
+char* PinJson::genPinTdo(){
+    
+}
+
+// Функция генерирующая маску для ячеек BS
+char* PinJson::genPinMask(){
+    
+}
+
 // Функция создающая файл и заполняющая его в соотвествии с json
 void PinJson::createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr, const std::vector<BsdlPins::PinInfo>& pins) {
     // Создание имени файла с расширением svf
@@ -339,13 +354,25 @@ void PinJson::createFile(std::string& filename_json, unsigned int& register_leng
     for(unsigned int i = 0; i < pin_counts.size(); i++){
         svfFile << "TIR " << register_length_instr << " TDI (" << EXTEST << ")\n";
 
-        // char* pin_tdi = genPinTdi();
-
-        // char* pin_tdo = genPinTdo();
-
-        // svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi << ") TDO (" << pin_tdo << ") MASK (" << pin_mask << ");\n";
+        char binary_string[register_length_bsdl + 1]; // Плюс символ конца строки
         
-        svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n\n"; 
+        // Заполнение строки двоичными данными
+        fill_binary_string(binary_string, register_length_bsdl);
+
+        char* pin_tdi = convert_binary_to_hex(binary_string);
+
+        char* pin_tdo = convert_binary_to_hex(binary_string);
+
+        char* pin_mask = convert_binary_to_hex(binary_string);
+
+        svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi <<  ") TDO (" << pin_tdo <<  ") MASK ("  << pin_mask << ");\n";
+        
+        svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n\n";
+
+        // // Освобождение памяти, выделенной для 16-ричной строки
+        // free(pin_tdi);
+        // free(pin_tdo); 
+        // free(pin_mask); 
     }
 
     // Закрытие файла

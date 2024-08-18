@@ -60,6 +60,11 @@ private:
     void print_conversion(const char* binary_string, char* hex_string);
     void fill_binary_string(char* binary_string, size_t length);
 
+    // Методы для генерации битовых масок для чтения и записи битов BS
+    char* genPinTdi();
+    char* genPinTdo();
+    char* genPinMask();
+
     // Члены класса управления SVF и передачи нужных файлов
     std::string filename_bsdl = "NO FILE";
     std::string filename_json = "NO FILE";
