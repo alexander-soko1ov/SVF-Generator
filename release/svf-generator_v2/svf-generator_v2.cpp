@@ -310,7 +310,7 @@ void PinJson::print_conversion(const char* binary_string, char* hex_string) {
     free(hex_string);
 }
 
-// Функция для заполнения строки чередующимися 1 и 0
+// Функция для заполнения строки чередующимися 1 и 0 (ТЕСТОВЫЙ РЕЖИМ)
 void PinJson::fill_binary_string(char* binary_string, size_t length) {
     for (size_t i = 0; i < length; ++i) {
         binary_string[i] = '1';
@@ -354,16 +354,25 @@ void PinJson::createFile(std::string& filename_json, unsigned int& register_leng
     for(unsigned int i = 0; i < pin_counts.size(); i++){
         svfFile << "TIR " << register_length_instr << " TDI (" << EXTEST << ")\n";
 
-        char binary_string[register_length_bsdl + 1]; // Плюс символ конца строки
+        // Инициализация переменной pinTdi
+        char str_pin_tdi[register_length_bsdl + 1];
+
+        // Инициализация переменной pinTdi
+        char str_pin_tdo[register_length_bsdl + 1];
+
+        // Инициализация переменной pinTdi
+        char str_pin_mask[register_length_bsdl + 1];
         
         // Заполнение строки двоичными данными
-        fill_binary_string(binary_string, register_length_bsdl);
+        fill_binary_string(str_pin_tdi, register_length_bsdl);
+        fill_binary_string(str_pin_tdo, register_length_bsdl);
+        fill_binary_string(str_pin_mask, register_length_bsdl);
 
-        char* pin_tdi = convert_binary_to_hex(binary_string);
+        char* pin_tdi = convert_binary_to_hex(str_pin_tdi);
 
-        char* pin_tdo = convert_binary_to_hex(binary_string);
+        char* pin_tdo = convert_binary_to_hex(str_pin_tdo);
 
-        char* pin_mask = convert_binary_to_hex(binary_string);
+        char* pin_mask = convert_binary_to_hex(str_pin_mask);
 
         svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi <<  ") TDO (" << pin_tdo <<  ") MASK ("  << pin_mask << ");\n";
         
