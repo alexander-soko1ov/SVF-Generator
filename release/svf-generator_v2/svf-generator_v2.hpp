@@ -62,9 +62,12 @@ private:
     // void fill_binary_string(char* binary_string, size_t length);
 
     // Методы для генерации битовых масок для чтения и записи битов BS
-    void genPinTdi(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells);
-    void genPinTdo(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells);
-    void genPinMask(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out);
+    void genPinTdi(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out);
+    void genPinTdo(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out);
+    void genPinMask(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out);
 
     // Функция для заполнения строки чередующимися 1 и 0 (ТЕСТОВЫЙ РЕЖИМ)
     void fill_binary_string(char* binary_string, size_t length);

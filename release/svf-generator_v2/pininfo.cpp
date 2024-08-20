@@ -74,9 +74,9 @@ BsdlPins::PinInfo::StatePin BsdlPins::PinInfo::stringToStatePin(const std::strin
 std::string BsdlPins::PinInfo::statePinToString(StatePin state) {
     switch (state) {
         case StatePin::high:
-            return "high";
+            return "1";
         case StatePin::low:
-            return "low";
+            return "0";
         case StatePin::z:
             return "z";
         case StatePin::x:

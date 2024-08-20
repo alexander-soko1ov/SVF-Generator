@@ -52,8 +52,8 @@ PinJson::StatePin PinJson::string_to_statepin(const std::string& value) {
 // Функция для преобразования StatePin в строку
 std::string PinJson::statepin_to_string(StatePin state) {
     switch (state) {
-        case StatePin::high: return "high";
-        case StatePin::low: return "low";
+        case StatePin::high: return "1";
+        case StatePin::low: return "0";
         case StatePin::z: return "z";
         case StatePin::x: return "x";
         default: throw std::invalid_argument("Неизвестное значение StatePin");
@@ -323,13 +323,15 @@ void PinJson::fill_binary_string(char* binary_string, size_t length) {
 }
 
 // Функция генерирующая маску для записи битов в ячейки BS
-void PinJson::genPinTdi(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells){
+void PinJson::genPinTdi(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
+                        const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out){
     
     fill_binary_string(binary_string, length); // заглужка
 }
 
 // Функция генерирующая маску для чтения битов в ячейки BS
-void PinJson::genPinTdo(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells){
+void PinJson::genPinTdo(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
+                        const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out){
     
     fill_binary_string(binary_string, length); // заглужка
 }
@@ -338,22 +340,7 @@ void PinJson::genPinTdo(char* binary_string, size_t length, const std::vector<Bs
 void PinJson::genPinMask(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
                         const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out){
 
-    for (size_t i = 0; i < pin_counts[count_out]; ++i) {
-        for (size_t j = 0; j < cells.size(); ++j) {
-            // std::cout << "Название пина из cells    " << cells[i].label << "    Название пина из pins_svf   " << pinJson.pin_name << std::endl;
-
-            if (cells[j].label == pins_svf[i].pin_name) {
-                // std::cout << "есть совпадение!" << "    i = " << i << std::endl;
-                
-                binary_string[j] = '1';
-            } else{
-                binary_string[j] = '0';
-                // std::cout << "заполняем нулями" << "    i = " << i << std::endl;
-            }
-        }
-    }
-
-    binary_string[length] = '\0';
+    fill_binary_string(binary_string, length); // заглужка
 }
 
 // Функция создающая файл и заполняющая его в соотвествии с json
@@ -386,10 +373,17 @@ void PinJson::createFile(std::string& filename_json, unsigned int& register_leng
         char str_pin_mask[register_length_bsdl + 1];
         
         // Заполнение строки двоичными данными
-        genPinTdi(str_pin_tdi, register_length_bsdl, pins, cells);
-        genPinTdo(str_pin_tdo, register_length_bsdl, pins, cells);
+        genPinTdi(str_pin_tdi, register_length_bsdl, pins, cells, count_out);
+        genPinTdo(str_pin_tdo, register_length_bsdl, pins, cells, count_out);
         genPinMask(str_pin_mask, register_length_bsdl, pins, cells, count_out);
         
+        // тестовый вывод битовых полей
+        std::cout << "Тестовый вывод битовых полей для блока номер " << count_out << ":   " << std::endl;
+        std::cout << "Поле TDI:     " << str_pin_tdi << std::endl;
+        std::cout << "Поле TDO:     " << str_pin_tdo << std::endl;
+        std::cout << "Поле MASK:    " << str_pin_mask << std::endl;
+        std::cout << "\n";
+
         // Перевод строки из двоичного формата в 16-ричный
         char* pin_tdi = convert_binary_to_hex(str_pin_tdi);
         char* pin_tdo = convert_binary_to_hex(str_pin_tdo);
