@@ -17,6 +17,7 @@ public:
         };
 
         std::string pin;       // номер физического пина, 0 для не выведенных пинов
+        std::string cell;      // номер ячейки BS
         std::string label;     // название физического пина
         std::string pin_type;  // тип ячейки in, out, inout
         unsigned int In;       // номер ячейки ввода
@@ -40,6 +41,11 @@ public:
         return pins;
     }
 
+    // Метод для получения вектора ячеек
+    const std::vector<PinInfo>& getCells() const {
+        return cells;
+    }
+
     // Метод для парсинга данных о длине регистра BSDL
     unsigned int boundary_length(const std::string& filename);
 
@@ -52,7 +58,7 @@ public:
         std::string content = readFile(filename);
 
         // Получаем даныне о пинах и заносим данные в переменную ping (vector)
-        pins = parseBSDFile(content);
+        cells = parseBSDFile(content);
 
         // Получаем данные об имени пина и его номере
         std::unordered_map<std::string, std::string> pinMap = parsePinMap(content);
@@ -61,11 +67,10 @@ public:
         std::unordered_map<std::string, std::string> pinTypes = parsePinTypes(content);
 
         // Устанавливаем связь номеров пинов и их типов
-        mapPinNumbersAndTypes(pins, pinMap, pinTypes);
+        mapPinNumbersAndTypes(cells, pinMap, pinTypes);
 
         // Удаляем дублирующиеся пины
-        pins = removeDuplicatePins(pins);
-
+        pins = removeDuplicatePins(cells);
     }
     // Функция для вывода информации о пинах
     // void printPinInfo(std::ostream &os=std::cout);
@@ -101,4 +106,5 @@ protected:
 
 private:
     std::vector<PinInfo> pins;
+    std::vector<PinInfo> cells;
 };

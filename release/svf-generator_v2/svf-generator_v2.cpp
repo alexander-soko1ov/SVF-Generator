@@ -19,10 +19,10 @@ bool PinJson::svfGen(std::string& filename_json){
     json jfile = pin_json.read_json_file(filename_json);
 
     // Обработка JSON и получение данных
-    std::vector<PinJson> pins = pin_json.process_json(jfile, pin_counts);
+    pins_svf = pin_json.process_json(jfile, pin_counts);
 
     // Вывод результата для проверки
-    pin_json.print_pins(pins, pin_counts);
+    // pin_json.print_pins(pins_svf, pin_counts);
 
     // Вывод количества пинов для каждого объекта JSON
     // std::cout << "\nКоличество пинов в каждом объекте JSON:" << std::endl;
@@ -237,16 +237,20 @@ json PinJson::read_json_file(const std::string& filename) {
 }
 
 // Функция для вывода данных пинов
-void PinJson::print_pins(const std::vector<PinJson>& pins, std::vector<size_t> pin_counts) {
+void PinJson::print_pins() {
     std::cout << "\nДанные записанные в JSON-файле:\n";
 
-    for (size_t i = 0; i < pin_counts.size(); i++) {
-        for(size_t count = 0; count < pin_counts[i]; count ++){
-            const auto& pin = pins[count];
+    size_t index = 0;
+    // for(auto& pin_count : pin_counts){
+    for(auto& pin_count : pin_counts){
+        for(size_t i = 0; i < pin_count; ++i){
+            
+            const auto& pin = pins_svf[index++];
+
             std::cout << "Pin: " << pin.pin_name 
-                << ", Read: " << statepin_to_string(pin.cell_read)
-                << ", Write: " << statepin_to_string(pin.cell_write)
-                << std::endl; 
+                    << ", Read: " << statepin_to_string(pin.cell_read)
+                    << ", Write: " << statepin_to_string(pin.cell_write)
+                    << std::endl; 
         }
         std::cout << std::endl; 
     }
@@ -310,7 +314,7 @@ void PinJson::print_conversion(const char* binary_string, char* hex_string) {
     free(hex_string);
 }
 
-// Функция для заполнения строки чередующимися 1 и 0 (ТЕСТОВЫЙ РЕЖИМ)
+// Функция для заполнения строки единицами (ТЕСТОВЫЙ РЕЖИМ)
 void PinJson::fill_binary_string(char* binary_string, size_t length) {
     for (size_t i = 0; i < length; ++i) {
         binary_string[i] = '1';
@@ -319,22 +323,42 @@ void PinJson::fill_binary_string(char* binary_string, size_t length) {
 }
 
 // Функция генерирующая маску для записи битов в ячейки BS
-char* PinJson::genPinTdi(){
-
+void PinJson::genPinTdi(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells){
+    
+    fill_binary_string(binary_string, length); // заглужка
 }
 
 // Функция генерирующая маску для чтения битов в ячейки BS
-char* PinJson::genPinTdo(){
+void PinJson::genPinTdo(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells){
     
+    fill_binary_string(binary_string, length); // заглужка
 }
 
 // Функция генерирующая маску для ячеек BS
-char* PinJson::genPinMask(){
-    
+void PinJson::genPinMask(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
+                        const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out){
+
+    for (size_t i = 0; i < pin_counts[count_out]; ++i) {
+        for (size_t j = 0; j < cells.size(); ++j) {
+            // std::cout << "Название пина из cells    " << cells[i].label << "    Название пина из pins_svf   " << pinJson.pin_name << std::endl;
+
+            if (cells[j].label == pins_svf[i].pin_name) {
+                // std::cout << "есть совпадение!" << "    i = " << i << std::endl;
+                
+                binary_string[j] = '1';
+            } else{
+                binary_string[j] = '0';
+                // std::cout << "заполняем нулями" << "    i = " << i << std::endl;
+            }
+        }
+    }
+
+    binary_string[length] = '\0';
 }
 
 // Функция создающая файл и заполняющая его в соотвествии с json
-void PinJson::createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr, const std::vector<BsdlPins::PinInfo>& pins) {
+void PinJson::createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr, 
+                        const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells) {
     // Создание имени файла с расширением svf
     std::string filename_svf = PinJson::replaceExtension(filename_json, ".json", ".svf");
 
@@ -348,10 +372,8 @@ void PinJson::createFile(std::string& filename_json, unsigned int& register_leng
     svfFile << "ENDIR "<< endir_state << ";\n";
     
     svfFile << "ENDDR "<< enddr_state << ";\n";
-
-    std::string EXTEST = "00000";  // заглушка, пока что не парсил из файла
     
-    for(unsigned int i = 0; i < pin_counts.size(); i++){
+    for(size_t count_out = 0; count_out < pin_counts.size(); count_out++){
         svfFile << "TIR " << register_length_instr << " TDI (" << EXTEST << ")\n";
 
         // Инициализация переменной pinTdi
@@ -364,24 +386,25 @@ void PinJson::createFile(std::string& filename_json, unsigned int& register_leng
         char str_pin_mask[register_length_bsdl + 1];
         
         // Заполнение строки двоичными данными
-        fill_binary_string(str_pin_tdi, register_length_bsdl);
-        fill_binary_string(str_pin_tdo, register_length_bsdl);
-        fill_binary_string(str_pin_mask, register_length_bsdl);
-
+        genPinTdi(str_pin_tdi, register_length_bsdl, pins, cells);
+        genPinTdo(str_pin_tdo, register_length_bsdl, pins, cells);
+        genPinMask(str_pin_mask, register_length_bsdl, pins, cells, count_out);
+        
+        // Перевод строки из двоичного формата в 16-ричный
         char* pin_tdi = convert_binary_to_hex(str_pin_tdi);
-
         char* pin_tdo = convert_binary_to_hex(str_pin_tdo);
-
         char* pin_mask = convert_binary_to_hex(str_pin_mask);
 
+        // Запись строки битовой маски в файл
         svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi <<  ") TDO (" << pin_tdo <<  ") MASK ("  << pin_mask << ");\n";
         
+        // Запись строки в файл
         svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n\n";
 
-        // // Освобождение памяти, выделенной для 16-ричной строки
-        // free(pin_tdi);
-        // free(pin_tdo); 
-        // free(pin_mask); 
+        // Освобождение памяти, выделенной для 16-ричной строки
+        free(pin_tdi);
+        free(pin_tdo); 
+        free(pin_mask); 
     }
 
     // Закрытие файла

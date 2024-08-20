@@ -93,6 +93,7 @@ BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
 
     PinInfo pinInfo;
     if (std::regex_search(line, match, pinRegex)) {
+        pinInfo.cell = match[1].str();
         pinInfo.label = match[3].str();
         pinInfo.function = match[4].str();
         match[5].str().empty() ? pinInfo.safeState : pinInfo.safeState = PinInfo::stringToStatePin(match[5].str()); 
@@ -195,7 +196,7 @@ void BsdlPins::mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unor
         if (pinMap.find(pin.label) != pinMap.end()) {
             pin.pin = pinMap.at(pin.label);
         } else {
-            pin.pin = "0";  // Используем 0 для ячеек BS, к которым не привязаны пины 
+            pin.pin = "*";  // Используем 0 для ячеек BS, к которым не привязаны пины 
         }
 
         if (pinTypes.find(pin.label) != pinTypes.end()) {
@@ -206,13 +207,13 @@ void BsdlPins::mapPinNumbersAndTypes(std::vector<PinInfo>& pins, const std::unor
     }
 }
 
-
 // Функция для вывода информации о пинах
 // void BsdlPins::printPinInfo(std::ostream &os) { 
 void BsdlPins::printPinInfo(const std::vector<BsdlPins::PinInfo>& pins) const { 
     for (const auto& pin : pins) {
         std::cout << "Pin: " << pin.pin 
-            << ", Port Name: " << (pin.label.empty() ? "*" : pin.label) // condition ? true_value : false_value
+            << ", Cell: " << pin.cell
+            << ", Port Name: " << pin.label // condition ? true_value : false_value (pin.label.empty() ? "*" : pin.label)
             << ", Pin type: " << pin.pin_type
             << ", Function: " << pin.function 
             << ", Cell In: " << pin.In
