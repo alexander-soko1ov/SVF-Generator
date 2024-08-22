@@ -93,7 +93,7 @@ BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
 
     PinInfo pinInfo;
     if (std::regex_search(line, match, pinRegex)) {
-        pinInfo.cell = match[1].str();
+        pinInfo.cell = std::stoi(match[1].str());
         pinInfo.label = match[3].str();
         pinInfo.function = match[4].str();
         match[5].str().empty() ? pinInfo.safeState : pinInfo.safeState = PinInfo::stringToStatePin(match[5].str()); 

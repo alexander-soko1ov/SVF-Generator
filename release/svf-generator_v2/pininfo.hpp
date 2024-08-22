@@ -17,7 +17,7 @@ public:
         };
 
         std::string pin;       // номер физического пина, 0 для не выведенных пинов
-        std::string cell;      // номер ячейки BS
+        unsigned int cell;      // номер ячейки BS
         std::string label;     // название физического пина
         std::string pin_type;  // тип ячейки in, out, inout
         unsigned int In;       // номер ячейки ввода

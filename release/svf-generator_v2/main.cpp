@@ -22,11 +22,11 @@ int main(int argc, char *argv[]) {
     BsdlPins.loadBsdl(filename_bsdl);
 
     // Получаем данные о длине регистра BSDL
-    unsigned int register_length_bsdl = BsdlPins.boundary_length(filename_bsdl);
+    size_t register_length_bsdl = BsdlPins.boundary_length(filename_bsdl);
     // std::cout << "Длина регистра BSDL: " << register_length_bsdl << "\n" << std::endl;
 
     // Получаем данные о длине регистра BSDL
-    unsigned int register_length_instr = BsdlPins.instruction_length(filename_bsdl);
+    size_t register_length_instr = BsdlPins.instruction_length(filename_bsdl);
     // std::cout << "Длина регистра инструкций: " << register_length_instr << "\n" << std::endl;
 
     // Получаем вектор пинов
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     PinJson.print_pins();
 
     // Создаём SVF-файл 
-    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr, pins, cells);
+    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr, cells);
 
     return 0;
 }

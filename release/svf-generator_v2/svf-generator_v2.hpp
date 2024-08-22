@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
+#include <gmpxx.h>
 
 #include "pininfo.hpp"
 
@@ -30,8 +31,8 @@ public:
     std::vector<std::string> parse_arguments(int argc, char *argv[]);
 
     // Метод создающий svf файл и заполняющий его данными
-    void createFile(std::string& filename_json, unsigned int& register_length_bsdl, unsigned int& register_length_instr, 
-                    const std::vector<BsdlPins::PinInfo>& pins, const std::vector<BsdlPins::PinInfo>& cells);
+    void createFile(std::string& filename_json, size_t& register_length_bsdl, size_t& register_length_instr, 
+                    const std::vector<BsdlPins::PinInfo>& cells);
 
     // Метод для вывода пинов записываемых в svf-файл
     void print_pins();
@@ -55,22 +56,16 @@ private:
     bool has_extension(const std::string& filename, const std::unordered_set<std::string>& validExtensions);
     bool is_valid_state(const std::string& state, const std::string valid_states[], size_t count);
 
-    // Методы для заполнения SVF-файла
-    void to_upper_case(char* str);
-    char* convert_binary_to_hex(const char* binary_string);
-    void print_conversion(const char* binary_string, char* hex_string);
-    // void fill_binary_string(char* binary_string, size_t length);
-
     // Методы для генерации битовых масок для чтения и записи битов BS
-    void genPinTdi(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
-                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out);
-    void genPinTdo(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
-                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out);
-    void genPinMask(char* binary_string, size_t length, const std::vector<BsdlPins::PinInfo>& pins, 
-                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out);
+    void genPinTdi(mpz_class& binary_string, size_t& length,  
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
+    void genPinTdo(mpz_class& binary_string, size_t& length, 
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
+    void genPinMask(mpz_class& binary_string, size_t& length,  
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
 
     // Функция для заполнения строки чередующимися 1 и 0 (ТЕСТОВЫЙ РЕЖИМ)
-    void fill_binary_string(char* binary_string, size_t length);
+    void fill_binary_string(mpz_class& binary_string, size_t& length);
 
     // Члены класса управления SVF и передачи нужных файлов
     std::string filename_bsdl = "NO FILE";
