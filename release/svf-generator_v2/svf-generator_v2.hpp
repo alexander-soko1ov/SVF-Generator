@@ -63,6 +63,8 @@ private:
                     const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
     void genPinMask(mpz_class& binary_string, size_t& length,  
                     const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
+    void genPinSmask(mpz_class& bitmask, size_t& register_length_bsdl, 
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
 
     // Функция для заполнения строки чередующимися 1 и 0 (ТЕСТОВЫЙ РЕЖИМ)
     void fill_binary_string(mpz_class& binary_string, size_t& length);
@@ -80,4 +82,15 @@ private:
 
     // Вектор для хранения данных о пинах, передаваемых как аргументы для svf-файла
     std::vector<PinJson> pins_svf; 
+
+    // Переменные для определения ANSI escape-кодов
+    // Сброс всех атрибутов
+    const std::string reset = "\033[0m";
+
+    // Цвета текста
+    const std::string red = "\033[31m";
+    const std::string magenta = "\033[35m";
+    
+    // Стиль текста
+    const std::string bold = "\033[1m";
 };
