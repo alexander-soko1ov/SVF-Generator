@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "svf-generator_v2.hpp"
+#include "svf-generator.hpp"
 #include "pininfo.hpp"
 
 

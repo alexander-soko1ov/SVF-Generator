@@ -6,7 +6,7 @@
 #include <gmpxx.h>
 #include <cstring>
 
-#include "svf-generator_v2.hpp"
+#include "svf-generator.hpp"
 #include "pininfo.hpp"
 
 using json = nlohmann::json;

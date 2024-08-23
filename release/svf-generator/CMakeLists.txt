@@ -21,10 +21,10 @@ add_compile_options(-Wall -Wextra -std=c++20)
 # Добавляем директорию с исходниками
 include_directories(${CMAKE_SOURCE_DIR})
 
-# Создаем библиотеку svf-generator_v2 из исходных файлов
-add_library(svf-generator_v2 STATIC
-    svf-generator_v2.cpp
-    svf-generator_v2.hpp
+# Создаем библиотеку svf-generator из исходных файлов
+add_library(svf-generator STATIC
+    svf-generator.cpp
+    svf-generator.hpp
 )
 
 # Создаем библиотеку pininfo из исходных файлов
@@ -38,8 +38,8 @@ add_executable(main
     main.cpp
 )
 
-# Связываем исполняемый файл main с библиотеками svf-generator_v2 и pininfo
-target_link_libraries(main PRIVATE svf-generator_v2 pininfo gmp gmpxx)
+# Связываем исполняемый файл main с библиотеками svf-generator и pininfo
+target_link_libraries(main PRIVATE svf-generator pininfo gmp gmpxx)
 
 # Устанавливаем опции компилятора для конкретного исполняемого файла:
 # - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
