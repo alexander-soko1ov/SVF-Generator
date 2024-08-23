@@ -13,7 +13,7 @@ bool BsdlPins::stringToBool(const std::string& str) {
 }
 
 // Функция для парсинга данных о длине регистра BSDL
-unsigned int BsdlPins::boundary_length(const std::string& filename) {
+unsigned int BsdlPins::boundaryLength(const std::string& filename) {
     std::string content = readFile(filename);
     unsigned int register_length_bsdl;
 
@@ -30,7 +30,7 @@ unsigned int BsdlPins::boundary_length(const std::string& filename) {
 }
 
 // Функция для парсинга данных о длине регистра инструкций
-unsigned int BsdlPins::instruction_length(const std::string& filename) {
+unsigned int BsdlPins::instructionLength(const std::string& filename) {
     std::string content = readFile(filename);
     unsigned int register_length_instr;
 
@@ -44,6 +44,23 @@ unsigned int BsdlPins::instruction_length(const std::string& filename) {
     }
 
     return register_length_instr;
+}
+
+// Функция для парсинга данных битовой маски для запуска EXTEST
+std::string BsdlPins::opcodeEXTEST(const std::string& filename) {
+    std::string content = readFile(filename);
+    std::string opcode_extest;
+
+    std::regex reglenRegex(R"(EXTEST\s+\((\w+)\))");
+    auto lines_begin = std::sregex_iterator(content.begin(), content.end(), reglenRegex);
+    auto lines_end = std::sregex_iterator();
+
+    for (std::sregex_iterator i = lines_begin; i != lines_end; ++i) {
+        std::smatch match = *i;
+        opcode_extest = match[1].str();
+    }
+
+    return opcode_extest;
 }
 
 // Функция для чтения файла и возврата его содержимого в виде строки
@@ -154,7 +171,7 @@ std::unordered_map<std::string, std::string> BsdlPins::parsePinTypes(const std::
 
 // Функция для парсинга файла .bsd и извлечения информации о пинах
 std::vector<BsdlPins::PinInfo> BsdlPins::parseBSDFile(const std::string& content) {
-    std::vector<PinInfo> pins;
+    std::vector<PinInfo> cells;
     std::regex lineRegex(R"((\d+\s*\(BC_\d+,.*\)))");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), lineRegex);
     auto lines_end = std::sregex_iterator();
@@ -162,10 +179,10 @@ std::vector<BsdlPins::PinInfo> BsdlPins::parseBSDFile(const std::string& content
     for (std::sregex_iterator i = lines_begin; i != lines_end; ++i) {
         std::smatch match = *i;
         PinInfo pin = parsePinInfo(match.str());
-        pins.push_back(pin);
+        cells.push_back(pin);
     }
 
-    return pins;
+    return cells;
 }
 
 // Функция для удаления дублирующихся пинов и переноса значения Cell In из дубликата в первый пин

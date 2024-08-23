@@ -32,7 +32,7 @@ public:
 
     // Метод создающий svf файл и заполняющий его данными
     void createFile(std::string& filename_json, size_t& register_length_bsdl, size_t& register_length_instr, 
-                    const std::vector<BsdlPins::PinInfo>& cells, const bool out);
+                    std::string& opcode_extest, const std::vector<BsdlPins::PinInfo>& cells, const bool out);
 
     // Метод для вывода пинов записываемых в svf-файл
     void print_pins();
@@ -55,17 +55,19 @@ private:
     void print_usage();
     bool has_extension(const std::string& filename, const std::unordered_set<std::string>& validExtensions);
     bool is_valid_state(const std::string& state, const std::string valid_states[], size_t count);
-
+    
     // Методы для генерации битовых масок для чтения и записи битов BS
-    void genPinTdi(mpz_class& binary_string, size_t& length,  
-                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
-    void genPinTdo(mpz_class& binary_string, size_t& length, 
-                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
-    void genPinMask(mpz_class& binary_string, size_t& length,  
-                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
+    void safeValues( mpz_class& bitmask, const size_t& register_length_bsdl,
+                    const std::vector<BsdlPins::PinInfo>& cells);
+    void genPinTdi(mpz_class& bitmask, const size_t& register_length_bsdl,  
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, const size_t& index);
+    void genPinTdo(mpz_class& bitmask, const size_t& register_length_bsdl, 
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, const size_t& index);
+    void genPinMask(mpz_class& bitmask, const size_t& register_length_bsdl,  
+                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, const size_t& index);
 
     // Функция для заполнения строки чередующимися 1 и 0 (ТЕСТОВЫЙ РЕЖИМ)
-    void fill_binary_string(mpz_class& binary_string, size_t& length);
+    void genSingleMask(mpz_class& binary_string, const size_t& length);
 
     // Члены класса управления SVF и передачи нужных файлов
     std::string filename_bsdl = "NO FILE";
@@ -74,15 +76,13 @@ private:
     std::string endir_state = "IDLE";
     std::string enddr_state = "IDLE";
     std::string runtest_state = "100";
-
-    std::string EXTEST = "00000";  // TODO: заглушка, пока что не парсил из файла (поставить расширенную подсветку синтаксиса)
     
     // Вектор для хранения количества пинов
     std::vector<size_t> pin_counts;
 
     // Вектор для хранения данных о пинах, передаваемых как аргументы для svf-файла
     std::vector<PinJson> pins_svf; 
-
+public:
     // Переменные для определения ANSI escape-кодов
     // Сброс всех атрибутов
     const std::string reset = "\033[0m";

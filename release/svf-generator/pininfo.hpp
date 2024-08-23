@@ -47,10 +47,13 @@ public:
     }
 
     // Метод для парсинга данных о длине регистра BSDL
-    unsigned int boundary_length(const std::string& filename);
+    unsigned int boundaryLength(const std::string& filename);
 
     // Метод для парсинга данных о длине регистра инструкций
-    unsigned int instruction_length(const std::string& filename);
+    unsigned int instructionLength(const std::string& filename);
+
+    // Метод для парсинга данных битовой маски для запуска EXTEST
+    std::string opcodeEXTEST(const std::string& filename);
 
     void loadBsdl(std::string filename){
     

@@ -22,23 +22,30 @@ int main(int argc, char *argv[]) {
     BsdlPins.loadBsdl(filename_bsdl);
 
     // Получаем данные о длине регистра BSDL
-    size_t register_length_bsdl = BsdlPins.boundary_length(filename_bsdl);
+    size_t register_length_bsdl = BsdlPins.boundaryLength(filename_bsdl);
     // std::cout << "Длина регистра BSDL: " << register_length_bsdl << "\n" << std::endl;
 
     // Получаем данные о длине регистра BSDL
-    size_t register_length_instr = BsdlPins.instruction_length(filename_bsdl);
+    size_t register_length_instr = BsdlPins.instructionLength(filename_bsdl);
     // std::cout << "Длина регистра инструкций: " << register_length_instr << "\n" << std::endl;
+
+    // Получаем данные о коде для запуска EXTEST
+    std::string opcode_extest = BsdlPins.opcodeEXTEST(filename_bsdl);
+    // std::cout << "Код для запуска EXTEST: " << opcode_extest << "\n" << std::endl;
+    if(register_length_instr != opcode_extest.length()) {
+        std::cerr << PinJson.red << "Несоответсвие длины регистра инструкций и команды EXTEST" << PinJson.reset << std::endl;
+        abort();
+    }
 
     // Получаем вектор пинов
     const std::vector<BsdlPins::PinInfo>& cells = BsdlPins.getCells();
     const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
 
-    // Выводим информацию о пинах
-    std::cout << "\nВывод ячеек:\n";
-    BsdlPins.printPinInfo(cells);
-
-    std::cout << "\nВывод пинов:\n";
-    BsdlPins.printPinInfo(pins);
+    // Выводим информацию о ячейках и пинах
+    // std::cout << "\nВывод ячеек:\n";
+    // BsdlPins.printPinInfo(cells);
+    // std::cout << "\nВывод пинов:\n";
+    // BsdlPins.printPinInfo(pins);
 
     // Читаем данные из JSON и записываем их в переменные
     PinJson.svfGen(filename_json);
@@ -50,7 +57,7 @@ int main(int argc, char *argv[]) {
     PinJson.print_pins();
 
     // Создаём SVF-файл 
-    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr, cells, 1);
+    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr, opcode_extest, cells, 1);
 
     return 0;
 }
