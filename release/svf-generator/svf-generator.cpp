@@ -449,9 +449,9 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
         if(out == 1){
             // тестовый вывод битовых полей
             std::cout << "Тестовый вывод битовых полей для блока номер " << count_out << ":   " << std::endl;
-            std::cout << "Поле TDI:     " << green << pin_tdi.get_str(2) << reset << std::endl;
-            std::cout << "Поле TDO:     " << green << pin_tdo.get_str(2) << reset << std::endl;
-            std::cout << "Поле MASK:    " << green << pin_mask.get_str(2)<< reset  << std::endl;
+            std::cout << "Поле TDI:     " << green << pin_tdi.get_str(16) << reset << std::endl;
+            std::cout << "Поле TDO:     " << green << pin_tdo.get_str(16) << reset << std::endl;
+            std::cout << "Поле MASK:    " << green << pin_mask.get_str(16)<< reset  << std::endl;
             std::cout << "\n";
         }
 

@@ -31,14 +31,14 @@ int main(int argc, char *argv[]) {
 
     // Получаем вектор пинов
     const std::vector<BsdlPins::PinInfo>& cells = BsdlPins.getCells();
-    // const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
+    const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
 
     // Выводим информацию о пинах
-    // BsdlPins.printPinInfo(cells);
+    std::cout << "\nВывод ячеек:\n";
+    BsdlPins.printPinInfo(cells);
 
-    // std::cout << "\n";
-
-    // BsdlPins.printPinInfo(pins);
+    std::cout << "\nВывод пинов:\n";
+    BsdlPins.printPinInfo(pins);
 
     // Читаем данные из JSON и записываем их в переменные
     PinJson.svfGen(filename_json);

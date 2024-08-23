@@ -2,12 +2,12 @@
 cmake_minimum_required(VERSION 3.17)
 
 # Поиск программы clang-tidy в системе. Если clang-tidy найден, он будет использоваться для статического анализа кода.
-# find_program(CLANG_TIDY clang-tidy clang-tidy-14 clang-tidy-15)
-# if(CLANG_TIDY)
-#     # Если clang-tidy был найден, указываем CMake использовать clang-tidy для C и C++ файлов
-#     set(CMAKE_C_CLANG_TIDY ${CLANG_TIDY})
-#     set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY})
-# endif()
+find_program(CLANG_TIDY clang-tidy clang-tidy-14 clang-tidy-15)
+if(CLANG_TIDY)
+    # Если clang-tidy был найден, указываем CMake использовать clang-tidy для C и C++ файлов
+    set(CMAKE_C_CLANG_TIDY ${CLANG_TIDY})
+    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY})
+endif()
 
 # Устанавливаем имя проекта и указываем, что проект использует C++ (по умолчанию это CXX)
 project(pininfoProject CXX)

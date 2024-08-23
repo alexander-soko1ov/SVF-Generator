@@ -121,7 +121,7 @@ BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
 // Функция для парсинга строк с номерами пинов
 std::unordered_map<std::string, std::string> BsdlPins::parsePinMap(const std::string& content) {
     std::unordered_map<std::string, std::string> pinMap;
-    std::regex pinEntryRegex(R"(\s*(\w+)\s*:\s*(\d+),)");
+    std::regex pinEntryRegex(R"(\s*(\w+)\s*:\s*(\w+),)");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), pinEntryRegex);
     auto lines_end = std::sregex_iterator();
 

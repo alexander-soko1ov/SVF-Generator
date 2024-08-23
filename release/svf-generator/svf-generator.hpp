@@ -74,7 +74,8 @@ private:
     std::string endir_state = "IDLE";
     std::string enddr_state = "IDLE";
     std::string runtest_state = "100";
-    std::string EXTEST = "00000";  // заглушка, пока что не парсил из файла
+
+    std::string EXTEST = "00000";  // TODO: заглушка, пока что не парсил из файла (поставить расширенную подсветку синтаксиса)
     
     // Вектор для хранения количества пинов
     std::vector<size_t> pin_counts;

@@ -4,9 +4,10 @@
 
 ## Формат ввода данных в программный модуль svf-calc
 ```
-./name --filename "filename_BSD" --pins  "pin_name_1, ... ,pin_name_n"
-                                 --write "pin_status_1, ...,pin_status_n"
-                                 --read  "pin_status_1, ...,pin_status_n"
+./name --filename filename_json   
+       --pins  pin-name1[, pin-name2[, pin-name3[...]]]
+       --write "pin_status_1, ...,pin_status_n"
+       --read  "pin_status_1, ...,pin_status_n"
 ```
 
 ## Пример ввода данных в программный модуль svf-calc
