@@ -11,10 +11,7 @@
 
 ## Пример ввода данных в программный модуль svf-calc
 ```
-./main --filename "STM32F1_Low_density_QFPN36.bsd"
-       --pins "PA8,PA3,PB6"         --write "1,1,0"     --read "x,x,1"
-       --pins "PA8,PA3,PB6,PB4,PB5" --write "1,z,z,0,z" --read "x,x,0,1,x"
-       --pins "PA2,PA1,PB2,PB4"     --write "z,1,1,0"   --read "1,0,x,x"
+./main --filename "STM32F1_Low_density_QFPN36.bsd" --pins "PA8,PA3,PB6"         --write "1,1,0"     --read "x,x,1" --pins "PA8,PA3,PB6,PB4,PB5" --write "1,z,z,0,z" --read "x,x,0,1,x" --pins "PA2,PA1,PB2,PB4"     --write "z,1,1,0"   --read "1,0,x,x"
 ```
 
 ## Формат ввода данных в программный модуль svf-generator_v2

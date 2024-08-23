@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
@@ -15,6 +16,8 @@ private:
     std::vector<std::vector<std::string>> readStatusList;
     std::string filenameBSD;
 
+    void print_usage();
+
     void parsingArguments(int argc, char *argv[], std::vector<std::vector<std::string>> &pinsList,
                           std::vector<std::vector<std::string>> &writeStatusList, std::vector<std::vector<std::string>> &readStatusList,
                           std::string &filenameBSD);
@@ -26,4 +29,9 @@ private:
     json createJsonObject(const std::vector<std::vector<std::string>>& pinsList,
                           const std::vector<std::vector<std::string>>& writeStatusList,
                           const std::vector<std::vector<std::string>>& readStatusList);
+
+protected:
+    std::vector<std::string> pins;
+    std::vector<std::string> writeStatus;
+    std::vector<std::string> readStatus;
 };

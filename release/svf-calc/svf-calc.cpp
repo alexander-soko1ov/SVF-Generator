@@ -1,9 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include <getopt.h>  
+
 #include "svf-calc.hpp"
 
 void JsonForm::fileForm(int argc, char *argv[]){
-        
     // Парсинг аргументов
     parsingArguments(argc, argv, pinsList, writeStatusList, readStatusList, filenameBSD);
 
@@ -21,51 +22,90 @@ void JsonForm::fileForm(int argc, char *argv[]){
     return;
 }
 
-// Функция для парсинга аргументов командной строки
+// Функция вывода help
+void JsonForm::print_usage() {
+    std::cout << "Usage: program [options]\n"
+            << "Options:\n"
+            << "  -f, --filename    Add a BSDL-file\n"
+            << "  -p, --pins        The name of the required pins\n"
+            << "  -w, --write       Input (1, 0, z)\n"
+            << "  -r, --read        Output (1, 0, x)\n"
+            << "  -h, --help        Show this help message\n";
+}
+
 void JsonForm::parsingArguments(int argc, char *argv[], std::vector<std::vector<std::string>> &pinsList,
                     std::vector<std::vector<std::string>> &writeStatusList, std::vector<std::vector<std::string>> &readStatusList,
                     std::string &filenameBSD) {
-    std::vector<std::string> pins;
-    std::vector<std::string> writeStatus;
-    std::vector<std::string> readStatus;
 
-    for (int i = 1; i < argc; ++i) {
-        if (std::string(argv[i]) == "--pins" && i + 1 < argc) {
-            if (!pins.empty()) {
-                pinsList.push_back(pins);
-                writeStatusList.push_back(writeStatus);
-                readStatusList.push_back(readStatus);
-                pins.clear();
-                writeStatus.clear();
-                readStatus.clear();
+    // std::vector<std::string> pins;
+    // std::vector<std::string> writeStatus;
+    // std::vector<std::string> readStatus;
+
+    // Опции для getopt_long
+    const struct option long_options[] = {
+        {"pins", required_argument, 0, 'p'},
+        {"write", required_argument, 0, 'w'},
+        {"read", required_argument, 0, 'r'},
+        {"filename", required_argument, 0, 'f'},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0}  // Завершающая запись
+    };
+
+    int opt;
+    int option_index = 0;
+
+    while ((opt = getopt_long(argc, argv, "p:w:r:f:h", long_options, &option_index)) != -1) {
+        switch (opt) {
+            case 'p': {
+                if (!pins.empty()) {
+                    pinsList.push_back(pins);
+                    writeStatusList.push_back(writeStatus);
+                    readStatusList.push_back(readStatus);
+                    pins.clear();
+                    writeStatus.clear();
+                    readStatus.clear();
+                }
+                std::string pinsStr = optarg;
+                size_t pos = 0;
+                while ((pos = pinsStr.find(',')) != std::string::npos) {
+                    pins.push_back(pinsStr.substr(0, pos));
+                    pinsStr.erase(0, pos + 1);
+                }
+                pins.push_back(pinsStr);
+                break;
             }
-            std::string pinsStr = argv[++i];
-            size_t pos = 0;
-            while ((pos = pinsStr.find(',')) != std::string::npos) {
-                pins.push_back(pinsStr.substr(0, pos));
-                pinsStr.erase(0, pos + 1);
+            case 'w': {
+                std::string writeStr = optarg;
+                size_t pos = 0;
+                while ((pos = writeStr.find(',')) != std::string::npos) {
+                    writeStatus.push_back(writeStr.substr(0, pos));
+                    writeStr.erase(0, pos + 1);
+                }
+                writeStatus.push_back(writeStr);
+                break;
             }
-            pins.push_back(pinsStr); 
-        } else if (std::string(argv[i]) == "--write" && i + 1 < argc) {
-            std::string writeStr = argv[++i];
-            size_t pos = 0;
-            while ((pos = writeStr.find(',')) != std::string::npos) {
-                writeStatus.push_back(writeStr.substr(0, pos));
-                writeStr.erase(0, pos + 1);
+            case 'r': {
+                std::string readStr = optarg;
+                size_t pos = 0;
+                while ((pos = readStr.find(',')) != std::string::npos) {
+                    readStatus.push_back(readStr.substr(0, pos));
+                    readStr.erase(0, pos + 1);
+                }
+                readStatus.push_back(readStr);
+                break;
             }
-            writeStatus.push_back(writeStr); 
-        } else if (std::string(argv[i]) == "--read" && i + 1 < argc) {
-            std::string readStr = argv[++i];
-            size_t pos = 0;
-            while ((pos = readStr.find(',')) != std::string::npos) {
-                readStatus.push_back(readStr.substr(0, pos));
-                readStr.erase(0, pos + 1);
-            }
-            readStatus.push_back(readStr);
-        } else if (std::string(argv[i]) == "--filename" && i + 1 < argc) {
-            filenameBSD = argv[++i];
+            case 'f':
+                filenameBSD = optarg;
+                break;
+            case 'h':
+                print_usage();
+                break;
+            default:
+                std::cerr << "Неизвестный аргумент: " << opt << std::endl;
+                exit(EXIT_FAILURE);
         }
     }
+
     if (!pins.empty()) {
         pinsList.push_back(pins);
         writeStatusList.push_back(writeStatus);

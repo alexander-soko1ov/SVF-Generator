@@ -308,9 +308,9 @@ void PinJson::genPinTdi(mpz_class& bitmask, size_t& register_length_bsdl,
 
                 // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     pins_svf " << pins_svf[temp_index].pin_name << std::endl;
                 
-                if((cells[i].function == "OUTPUT3") && (statepin_to_string(pins_svf[temp_index].cell_write) != "z")){
+                if(((cells[i].function == "OUTPUT") || (cells[i].function == "OUTPUT2") || (cells[i].function == "OUTPUT3")) && (statepin_to_string(pins_svf[temp_index].cell_write) != "z")){
 
-                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     cells_func " << cells[i].Config << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
+                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     " << cells[i].function << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
                     bitmask |= (mpz_class(!cells[i].turnOff) << cells[i].Config); // запись в битовую маску для включённого драйвера 
 
                     if(statepin_to_string(pins_svf[temp_index].cell_write) == "1"){
@@ -324,9 +324,9 @@ void PinJson::genPinTdi(mpz_class& bitmask, size_t& register_length_bsdl,
                     }
                     
                     // std::cout << "значение драйвера "  << !cells[i].turnOff << "   отключения " << cells[i].turnOff << " " << cells[i].label << std::endl;
-                } else if((cells[i].function == "OUTPUT3") && (statepin_to_string(pins_svf[temp_index].cell_write) == "z")){
+                } else if(((cells[i].function == "OUTPUT") || (cells[i].function == "OUTPUT2") || (cells[i].function == "OUTPUT3")) && (statepin_to_string(pins_svf[temp_index].cell_write) == "z")){
                     
-                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     cells_func " << cells[i].Config << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
+                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     " << cells[i].function << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
                     bitmask |= (mpz_class(cells[i].turnOff) << cells[i].Config); // запись в битовую маску для отключённого драйвера
                 } 
             } 
@@ -420,7 +420,7 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
                 "TRST " << trst_state << ";\n";
     } else{
         
-        std::cerr << red << "Окончание программы тестирования так как вывод TRST в состоянии ON" << reset << std::endl;
+        std::cerr << red << "Окончание программы тестирования так как вывод TRST находится не в состоянии OFF" << reset << std::endl;
         abort();
     }
     
