@@ -32,21 +32,21 @@ public:
 
     // Метод создающий svf файл и заполняющий его данными
     void createFile(std::string& filename_json, size_t& register_length_bsdl, size_t& register_length_instr, 
-                    const std::vector<BsdlPins::PinInfo>& cells);
+                    const std::vector<BsdlPins::PinInfo>& cells, const bool out);
 
     // Метод для вывода пинов записываемых в svf-файл
     void print_pins();
 
+    // Вывод пинов, записанных в json-файл
+    void print_json();
+
 private:
     // Приватные методы
-
     static StatePin string_to_statepin(const std::string& value);
     static std::string statepin_to_string(StatePin state);
     PinJson::StatePin cell_value(const std::string& value);
     std::vector<PinJson> process_json(const json& jfile, std::vector<size_t>& pin_counts);
     json read_json_file(const std::string& filename);
-    // void print_pins(const std::vector<PinJson>& pins, std::vector<size_t> pin_counts);
-    // void print_usage();
 
     // Метод замены расширений файлов
     std::string replaceExtension(const std::string& filename, const std::string& oldExt, const std::string& newExt);
@@ -63,8 +63,6 @@ private:
                     const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
     void genPinMask(mpz_class& binary_string, size_t& length,  
                     const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
-    void genPinSmask(mpz_class& bitmask, size_t& register_length_bsdl, 
-                    const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index);
 
     // Функция для заполнения строки чередующимися 1 и 0 (ТЕСТОВЫЙ РЕЖИМ)
     void fill_binary_string(mpz_class& binary_string, size_t& length);
@@ -75,6 +73,7 @@ private:
     std::string trst_state = "OFF";
     std::string endir_state = "IDLE";
     std::string enddr_state = "IDLE";
+    std::string runtest_state = "100";
     std::string EXTEST = "00000";  // заглушка, пока что не парсил из файла
     
     // Вектор для хранения количества пинов
@@ -90,6 +89,7 @@ private:
     // Цвета текста
     const std::string red = "\033[31m";
     const std::string magenta = "\033[35m";
+    const std::string green = "\033[32m";
     
     // Стиль текста
     const std::string bold = "\033[1m";

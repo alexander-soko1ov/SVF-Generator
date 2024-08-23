@@ -64,12 +64,13 @@ std::string PinJson::statepin_to_string(StatePin state) {
 void PinJson::print_usage() {
     std::cout << "Usage: program [options]\n"
             << "Options:\n"
-            << "  -b, --bsdl    Add a BSDL-file\n"
-            << "  -j, --json   Add a JSON-file\n"
-            << "  -t, --trst   Set the TRST state (ON, OFF, z, ABSENT)\n"
-            << "  -i, --endir  Set the ENDIR state (IRPAUSE, DRPAUSE, RESET, IDLE)\n"
-            << "  -d, --enddr  Set the ENDDR state (IRPAUSE, DRPAUSE, RESET, IDLE)\n"
-            << "  -h, --help   Show this help message\n";
+            << "  -b, --bsdl     Add a BSDL-file\n"
+            << "  -j, --json     Add a JSON-file\n"
+            << "  -t, --trst     Set the TRST state (ON, OFF, z, ABSENT)\n"
+            << "  -i, --endir    Set the ENDIR state (IRPAUSE, DRPAUSE, RESET, IDLE)\n"
+            << "  -d, --enddr    Set the ENDDR state (IRPAUSE, DRPAUSE, RESET, IDLE)\n"
+            << "  -r, --runtest  Number of clock cycles (def 100 TCK)\n"
+            << "  -h, --help     Show this help message\n";
 }
 
 // Функция проверки корректности id введённого в CLI аргументов
@@ -93,7 +94,7 @@ bool PinJson::has_extension(const std::string& filename, const std::unordered_se
 }
 
 // Функция для обработки аргументов командной строки
-std::vector<std::string> PinJson::parse_arguments(int argc, char *argv[]){
+ std::vector<std::string>  PinJson::parse_arguments(int argc, char *argv[]){
 
     // Инициализация вспомагательных переменных
     int option_index = 0;
@@ -106,6 +107,7 @@ std::vector<std::string> PinJson::parse_arguments(int argc, char *argv[]){
         {"trst", required_argument, 0, 't'},
         {"endir", required_argument, 0, 'i'},
         {"enddr", required_argument, 0, 'd'},
+        {"runtest", required_argument, 0, 'r'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -115,7 +117,7 @@ std::vector<std::string> PinJson::parse_arguments(int argc, char *argv[]){
     const std::string endir_enddr_states[] = {"IRPAUSE", "DRPAUSE", "RESET", "IDLE"};
 
     // Цикл проверки всех переданных аргументов
-    while ((c = getopt_long(argc, argv, "b:j:t:i:d:h", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "b:j:t:i:d:r:h", long_options, &option_index)) != -1) {
         switch (c) {
             case 'b':
                 filename_bsdl = optarg;
@@ -152,6 +154,13 @@ std::vector<std::string> PinJson::parse_arguments(int argc, char *argv[]){
                     abort();
                 }
                 break;
+            case 'r':
+                runtest_state = optarg;
+                // if (!is_valid_state(runtest_state, endir_enddr_states, 4)) {
+                //     std::cerr << "Неверное значение --runtest. Возможное значение от 20 до .\n";
+                //     abort();
+                // }
+                break;
             case 'h':
                 print_usage();
                 break;
@@ -166,16 +175,21 @@ std::vector<std::string> PinJson::parse_arguments(int argc, char *argv[]){
         abort();
     }
 
-    // Вывод записанных аргументов
-    std::cout << "\nBSDL-file: " << filename_bsdl << "\n";
-    std::cout << "JSON-file: " << filename_json << "\n";
-    std::cout << "TRST state: " << trst_state << "\n";
-    std::cout << "ENDIR state: " << endir_state << "\n";
-    std::cout << "ENDDR state: " << enddr_state << "\n";
-
     std::vector<std::string> filename = {filename_bsdl, filename_json};
 
     return filename;
+}
+
+// Тестовый вывод пинов из json-файла
+void PinJson::print_json(){
+    // Вывод записанных аргументов
+    std::cout << "\n";
+    std::cout << "BSDL-file:    " << green << filename_bsdl << reset << "\n";
+    std::cout << "JSON-file:    " << green << filename_json << reset << "\n";
+    std::cout << "TRST state:   " << green << trst_state << reset << "\n";
+    std::cout << "ENDIR state:  " << green << endir_state << reset << "\n";
+    std::cout << "ENDDR state:  " << green << enddr_state << reset << "\n";
+    std::cout << "RUNTEST:      " << green << runtest_state << reset << "\n";
 }
 
 // Функции для работы с JSON
@@ -275,53 +289,9 @@ void PinJson::fill_binary_string(mpz_class& bitmask, size_t& register_length_bsd
     }
 }
 
-// Функция генерирующая маску для установки значений, при чтении битов ячеек BS
+// Функция генерирующая маску для чтения битов в ячейки BS
 void PinJson::genPinTdi(mpz_class& bitmask, size_t& register_length_bsdl,
                         const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index){
-
-    // fill_binary_string(bitmask, register_length_bsdl); // заглужка
-    
-    size_t temp_index = index;
-
-    for (size_t j = 0; j < pin_counts[count_out]; ++j) {
-        
-        // std::cout << "temp_index " << temp_index << "   index " << index << std::endl;
-
-        for(size_t i = 0; i < register_length_bsdl; ++i){
-            
-            if(cells[i].label == pins_svf[temp_index].pin_name){
-
-                if((cells[i].function == "INPUT") && (statepin_to_string(pins_svf[temp_index].cell_read) != "x")){
-                    
-                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     pins_svf " << pins_svf[temp_index].pin_name << std::endl;
-                    
-                    if(statepin_to_string(pins_svf[temp_index].cell_read) == "1"){
-
-                        // std::cout << "read  " << statepin_to_string(pins_svf[temp_index].cell_read) << std::endl;
-
-                        bitmask |= (mpz_class(1) << cells[i].In); // если write = 1, то пишем 1 в маску
-                    } else if(statepin_to_string(pins_svf[temp_index].cell_read) == "0"){
-                        
-                        // std::cout << "read  " << statepin_to_string(pins_svf[temp_index].cell_read) << std::endl;
-
-                        bitmask |= (mpz_class(0) << cells[i].In); // если write = 0, то пишем 0 в маску (для варианта z ниже)
-                    }
-                    
-                } else if (cells[i].function == "INPUT"){
-                    // std::cout << red << "Я понятия не имею, как записать в двоичную ячейку значение " << bold 
-                    //             << statepin_to_string(pins_svf[temp_index].cell_read) << "  " << pins_svf[temp_index].pin_name << reset << std::endl;
-                }
-            }
-        }
-        temp_index++;    
-    }
-}
-
-// Функция генерирующая маску для чтения битов в ячейки BS
-void PinJson::genPinTdo(mpz_class& bitmask, size_t& register_length_bsdl,
-                        const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index){
-
-    // fill_binary_string(bitmask, register_length_bsdl); // заглужка
 
     /* В структуре bsd файла при описании ячейки control имеется значение при котором драйвер отключается, нам 
     необходимо заменить данное значение на инверсное и записать по индексу ячейки control
@@ -331,8 +301,6 @@ void PinJson::genPinTdo(mpz_class& bitmask, size_t& register_length_bsdl,
     size_t temp_index = index;
 
     for (size_t j = 0; j < pin_counts[count_out]; ++j) {
-        
-        // std::cout << "temp_index " << temp_index << "   index " << index << std::endl;
 
         for(size_t i = 0; i < register_length_bsdl; ++i){
             
@@ -342,24 +310,68 @@ void PinJson::genPinTdo(mpz_class& bitmask, size_t& register_length_bsdl,
                 
                 if((cells[i].function == "OUTPUT3") && (statepin_to_string(pins_svf[temp_index].cell_write) != "z")){
 
-                    bitmask |= (mpz_class(!cells[i].turnOff) << cells[i].Config); // запись в битовую маску для включённого драйвера
+                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     cells_func " << cells[i].Config << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
+                    bitmask |= (mpz_class(!cells[i].turnOff) << cells[i].Config); // запись в битовую маску для включённого драйвера 
 
                     if(statepin_to_string(pins_svf[temp_index].cell_write) == "1"){
                         
+                        // std::cout  << "  cells:  " << cells[i].cell << "    " << cells[i].label << "  cell_write  " << statepin_to_string(pins_svf[temp_index].cell_write) << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
                         bitmask |= (mpz_class(1) << cells[i].Out); // если write = 1, то пишем 1 в маску
                     } else if(statepin_to_string(pins_svf[temp_index].cell_write) == "0"){
-                        
+
+                        // std::cout << "  cells:  " << cells[i].cell << "    " << cells[i].label << "  cell_write  " << statepin_to_string(pins_svf[temp_index].cell_write) << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
                         bitmask |= (mpz_class(0) << cells[i].Out); // если write = 0, то пишем 0 в маску (для варианта z ниже)
                     }
                     
                     // std::cout << "значение драйвера "  << !cells[i].turnOff << "   отключения " << cells[i].turnOff << " " << cells[i].label << std::endl;
                 } else if((cells[i].function == "OUTPUT3") && (statepin_to_string(pins_svf[temp_index].cell_write) == "z")){
                     
-                    bitmask |= (mpz_class(1) << cells[i].Config); // запись в битовую маску для отключённого драйвера
-                    
-                    // std::cout << "значение драйвера "  << cells[i].turnOff << "   отключение " << cells[i].turnOff << " " << cells[i].label << std::endl;
-                }
+                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     cells_func " << cells[i].Config << "   " << statepin_to_string(pins_svf[temp_index].cell_write) << std::endl;
+                    bitmask |= (mpz_class(cells[i].turnOff) << cells[i].Config); // запись в битовую маску для отключённого драйвера
+                } 
             } 
+        }
+        temp_index++;    
+    }
+}
+
+// Функция генерирующая маску для установки значений, при чтении битов ячеек BS
+void PinJson::genPinTdo(mpz_class& bitmask, size_t& register_length_bsdl,
+                        const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index){
+    
+    size_t temp_index = index;
+
+    for (size_t j = 0; j < pin_counts[count_out]; ++j) {
+        
+        // std::cout << "temp_index " << temp_index << "   index " << index << std::endl;
+
+        for(size_t i = 0; i < register_length_bsdl; ++i){
+            
+            if(cells[i].label == pins_svf[temp_index].pin_name){
+
+                // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     pins_svf " << pins_svf[temp_index].pin_name << std::endl;
+
+                if((cells[i].function == "INPUT") && (statepin_to_string(pins_svf[temp_index].cell_read) != "x")){
+                    
+                    // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     pins_svf " << pins_svf[temp_index].pin_name << std::endl;
+                    
+                    if(statepin_to_string(pins_svf[temp_index].cell_read) == "1"){
+
+                        // std::cout << "read  " << statepin_to_string(pins_svf[temp_index].cell_read) << std::endl;
+                        bitmask |= (mpz_class(1) << cells[i].In); // если write = 1, то пишем 1 в маску
+
+                    } else if(statepin_to_string(pins_svf[temp_index].cell_read) == "0"){
+                        
+                        // std::cout << "read  " << statepin_to_string(pins_svf[temp_index].cell_read) << std::endl;
+                        bitmask |= (mpz_class(0) << cells[i].In); // если write = 0, то пишем 0 в маску (для варианта z ниже)
+                    }
+                    
+                } 
+                // else if ((cells[i].function == "INPUT") && (statepin_to_string(pins_svf[temp_index].cell_read) == "x")){
+                //     std::cout << red << "Я понятия не имею, как записать в двоичную ячейку значение " << bold 
+                //                 << statepin_to_string(pins_svf[temp_index].cell_read) << "  " << pins_svf[temp_index].pin_name << reset << std::endl;
+                // }
+            }
         }
         temp_index++;    
     }
@@ -369,66 +381,24 @@ void PinJson::genPinTdo(mpz_class& bitmask, size_t& register_length_bsdl,
 void PinJson::genPinMask(mpz_class& bitmask, size_t& register_length_bsdl, 
                         const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index){   
 
-    // fill_binary_string(bitmask, register_length_bsdl); // заглужка
-    
     size_t temp_index = index;
 
     for (size_t j = 0; j < pin_counts[count_out]; ++j) {
-        
-        // std::cout << "temp_index " << temp_index << "   index " << index << std::endl;
 
         for(size_t i = 0; i < register_length_bsdl; ++i){
             
             if(cells[i].label == pins_svf[temp_index].pin_name){
-            
-                bitmask |= (mpz_class(1) << cells[i].cell);
+               
+                if((cells[i].function == "INPUT") && (statepin_to_string(pins_svf[temp_index].cell_read) != "x")){
 
-                // std::cout << "найдено совпадение!" << "  cells:  " << cells[i].cell << "    " << cells[i].label << "     pins_svf " << pins_svf[temp_index].pin_name << std::endl;
-                
-                if(cells[i].function == "OUTPUT3"){
-
-                    bitmask |= (mpz_class(1) << cells[i].Config);
-                    
-                    // std::cout << "найдено совпадение!"  << "  config: " << cells[i].Config << std::endl;
-                }
-            } 
-        }
-        temp_index++;    
-    }
-}
-
-// Функция генерирующая маску TDI для ячеек BS
-void PinJson::genPinSmask(mpz_class& bitmask, size_t& register_length_bsdl, 
-                        const std::vector<BsdlPins::PinInfo>& cells, size_t& count_out, size_t index){   
-
-    // fill_binary_string(bitmask, register_length_bsdl); // заглужка
-    
-    size_t temp_index = index;
-
-    for (size_t j = 0; j < pin_counts[count_out]; ++j) {
-        
-        // std::cout << "temp_index " << temp_index << "   index " << index << std::endl;
-
-        for(size_t i = 0; i < register_length_bsdl; ++i){
-            
-            
-            if(cells[i].label == pins_svf[temp_index].pin_name){
-
-                if((cells[i].function == "INPUT") && (statepin_to_string(pins_svf[temp_index].cell_read) == "x")){
-                    
-                    bitmask |= (mpz_class(0) << cells[i].cell);
-                    // std::cout << "пофиг на эту ячейку ибо там x) " << cells[i].cell << "    " << cells[i].label << std::endl; 
-                } else if (cells[i].function == "OUTPUT3") {
-
-                    bitmask |= (mpz_class(1) << cells[i].Config);
-                    // std::cout << "найдено совпадение!"  << "  config: " << cells[i].Config << "    " << cells[i].label << std::endl;  
-                } else if ((cells[i].function == "INPUT") && (statepin_to_string(pins_svf[temp_index].cell_read) != "x")){
-
+                    // std::cout << "найдено совпадение!"  << "  config: " << cells[i].Config << "     " << statepin_to_string(pins_svf[temp_index].cell_read) << std::endl;
                     bitmask |= (mpz_class(1) << cells[i].cell);
-                    // std::cout << "найдено совпадение!"  << "  config: " << cells[i].Config << "    " << cells[i].label << std::endl;  
-                } else{
-                    std::cout << red << "ХЗ как это вообще произошло" << cells[i].Config << "    " << cells[i].label << reset << std::endl;  
-                }
+                } 
+                // else if ((cells[i].function == "OUTPUT3") && (statepin_to_string(pins_svf[temp_index].cell_read) == "x")){
+                    
+                //     std::cout << "найдено совпадение!"  << "  config: " << cells[i].Config << "     " << statepin_to_string(pins_svf[temp_index].cell_read) << std::endl;
+                //     // bitmask |= (mpz_class(1) << cells[i].Config);
+                // }
             } 
         }
         temp_index++;    
@@ -437,7 +407,7 @@ void PinJson::genPinSmask(mpz_class& bitmask, size_t& register_length_bsdl,
 
 // Функция создающая файл и заполняющая его в соотвествии с json
 void PinJson::createFile(std::string& filename_json, size_t& register_length_bsdl, size_t& register_length_instr, 
-                        const std::vector<BsdlPins::PinInfo>& cells) {
+                        const std::vector<BsdlPins::PinInfo>& cells, const bool out) {
     // Создание имени файла с расширением svf
     std::string filename_svf = PinJson::replaceExtension(filename_json, ".json", ".svf");
 
@@ -445,12 +415,18 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
     std::ofstream svfFile(filename_svf);
 
     // Запись данных в файл (длина регистра 5 bit для STM32F1)
-    svfFile << "! Начать программу тестирования\n"
+    if(trst_state == "OFF"){
+        svfFile << "! Начать программу тестирования\n\n"
                 "TRST " << trst_state << ";\n";
-
+    } else{
+        
+        std::cerr << red << "Окончание программы тестирования так как вывод TRST в состоянии ON" << reset << std::endl;
+        abort();
+    }
+    
     svfFile << "ENDIR "<< endir_state << ";\n";
     
-    svfFile << "ENDDR "<< enddr_state << ";\n";
+    svfFile << "ENDDR "<< enddr_state << ";\n\n";
     
     // Инициализация переменной index для работы с вектором pins_svf
     size_t index = 0;
@@ -462,37 +438,39 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
         mpz_class pin_tdi(0);
         mpz_class pin_tdo(0);
         mpz_class pin_mask(0);
-        mpz_class pin_smask(0);
         
         // Заполнение строки двоичными данными
-        genPinTdi(pin_tdi, register_length_bsdl, cells, count_out, index);       
-        genPinTdo(pin_tdo, register_length_bsdl, cells, count_out, index);
+        genPinTdi(pin_tdi, register_length_bsdl, cells, count_out, index);
+        genPinTdo(pin_tdo, register_length_bsdl, cells, count_out, index);    
         genPinMask(pin_mask, register_length_bsdl, cells, count_out, index);
-        genPinSmask(pin_smask, register_length_bsdl, cells, count_out, index);
         
         index += pin_counts[count_out];
         
-        // тестовый вывод битовых полей
-        std::cout << "Тестовый вывод битовых полей для блока номер " << count_out << ":   " << std::endl;
-        std::cout << "Поле TDI:     " << pin_tdi.get_str(16) << std::endl;
-        std::cout << "Поле TDO:     " << pin_tdo.get_str(16) << std::endl;
-        std::cout << "Поле MASK:    " << pin_mask.get_str(16) << std::endl;
-        std::cout << "Поле SMASK:   " << pin_smask.get_str(16) << std::endl;
-        std::cout << "\n";
+        if(out == 1){
+            // тестовый вывод битовых полей
+            std::cout << "Тестовый вывод битовых полей для блока номер " << count_out << ":   " << std::endl;
+            std::cout << "Поле TDI:     " << green << pin_tdi.get_str(2) << reset << std::endl;
+            std::cout << "Поле TDO:     " << green << pin_tdo.get_str(2) << reset << std::endl;
+            std::cout << "Поле MASK:    " << green << pin_mask.get_str(2)<< reset  << std::endl;
+            std::cout << "\n";
+        }
 
         // Запись строки битовой маски в файл
-        svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi.get_str(16) <<  ") TDO (" << pin_tdo.get_str(16) 
-                <<  ") MASK ("  << pin_mask.get_str(16) << ") SMASK (" << pin_smask.get_str(16) << ");\n";
+        svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi.get_str(16) <<  ") TDO (" 
+                << pin_tdo.get_str(16) <<  ") MASK ("  << pin_mask.get_str(16) << ");\n";
         
         // Запись строки в файл
-        svfFile << "RUNTEST 100 TCK ENDSTATE IDLE;\n\n";
+        svfFile << "RUNTEST " << runtest_state << " TCK ENDSTATE IDLE;\n\n";
     }
 
+    // Окончание программы тестирования
     svfFile << "! Программа тестирования окончена\n";
 
     // Закрытие файла
     svfFile.close();
 
-    // Успешное завершение программы
-    std::cout << "\nФайл " << magenta << filename_svf << reset << " успешно создан." << std::endl;
+    if(out == 1){
+        // Успешное завершение программы
+        std::cout << "\nФайл " << magenta << filename_svf << reset << " успешно создан." << std::endl;
+    }
 }

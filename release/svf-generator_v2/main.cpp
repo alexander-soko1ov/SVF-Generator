@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 
     // Получаем вектор пинов
     const std::vector<BsdlPins::PinInfo>& cells = BsdlPins.getCells();
-    const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
+    // const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
 
     // Выводим информацию о пинах
     // BsdlPins.printPinInfo(cells);
@@ -43,11 +43,14 @@ int main(int argc, char *argv[]) {
     // Читаем данные из JSON и записываем их в переменные
     PinJson.svfGen(filename_json);
 
+    // Тестовый вывод пинов из json-файла
+    PinJson.print_json();
+
     // Выводим пины, записанные в JSON-файле
     PinJson.print_pins();
 
     // Создаём SVF-файл 
-    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr, cells);
+    PinJson.createFile(filename_json, register_length_bsdl, register_length_instr, cells, 1);
 
     return 0;
 }
