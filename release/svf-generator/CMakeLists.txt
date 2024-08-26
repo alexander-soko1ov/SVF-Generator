@@ -33,14 +33,32 @@ add_library(pininfo STATIC
     pininfo.hpp
 )
 
-# Создаем исполняемый файл с именем main из исходного файла main.cpp
-add_executable(main
-    main.cpp
+# Создаем библиотеку svf-calculator из исходных файлов
+add_library(svf-calculator STATIC
+    svf-calculator.cpp
+    svf-calculator.hpp
 )
 
-# Связываем исполняемый файл main с библиотеками svf-generator и pininfo
-target_link_libraries(main PRIVATE svf-generator pininfo gmp gmpxx)
+# Создаем исполняемый файл с именем svf-gen из исходного файла svf-gen.cpp
+add_executable(svf-gen
+    svf-gen.cpp
+)
 
-# Устанавливаем опции компилятора для конкретного исполняемого файла:
+# Связываем исполняемый файл svf-gen с библиотеками svf-generator и pininfo, а также с библиотеками gmp и gmpxx
+target_link_libraries(svf-gen PRIVATE svf-generator pininfo gmp gmpxx)
+
+# Устанавливаем опции компилятора для исполняемого файла svf-gen:
 # - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
-target_compile_options(main PRIVATE -g3)
+target_compile_options(svf-gen PRIVATE -g3)
+
+# Создаем исполняемый файл с именем svf-calc из исходного файла svf-calc.cpp
+add_executable(svf-calc
+    svf-calc.cpp
+)
+
+# Связываем исполняемый файл svf-calc с библиотекой svf-calculator
+target_link_libraries(svf-calc PRIVATE svf-calculator)
+
+# Устанавливаем опции компилятора для исполняемого файла svf-calc:
+# - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
+target_compile_options(svf-calc PRIVATE -g3)

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <vector>
 #include <string>
 #include <unordered_map>
 
@@ -47,7 +48,7 @@ unsigned int BsdlPins::instructionLength(const std::string& filename) {
 }
 
 // Функция для парсинга данных битовой маски для запуска EXTEST
-std::string BsdlPins::opcodeEXTEST(const std::string& filename) {
+std::string BsdlPins::opcodeEXTEST(const std::string& filename, const size_t& register_length_instr) {
     std::string content = readFile(filename);
     std::string opcode_extest;
 
@@ -60,12 +61,25 @@ std::string BsdlPins::opcodeEXTEST(const std::string& filename) {
         opcode_extest = match[1].str();
     }
 
+    if(register_length_instr != opcode_extest.length()) {
+        std::cerr << red << "Несоответствие длины регистра инструкций и команды EXTEST" << reset << std::endl;
+        abort();
+    }
+
     return opcode_extest;
 }
 
 // Функция для чтения файла и возврата его содержимого в виде строки
-std::string BsdlPins::readFile(const std::string& filename) {
-    std::ifstream file(filename);
+std::string BsdlPins::readFile(const std::string& filename_bsdl) {
+
+    BsdlPins BsdlPins;
+
+    if(filename_bsdl == "NO FILE"){
+        std::cerr << BsdlPins.red << "Введите имя BSDL-файла!" << BsdlPins.reset << std::endl;
+        abort();
+    }
+
+    std::ifstream file(filename_bsdl);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
     }

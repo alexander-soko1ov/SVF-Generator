@@ -53,7 +53,7 @@ public:
     unsigned int instructionLength(const std::string& filename);
 
     // Метод для парсинга данных битовой маски для запуска EXTEST
-    std::string opcodeEXTEST(const std::string& filename);
+    std::string opcodeEXTEST(const std::string& filename, const size_t& register_length_instr);
 
     void loadBsdl(std::string filename){
     
@@ -110,4 +110,17 @@ protected:
 private:
     std::vector<PinInfo> pins;
     std::vector<PinInfo> cells;
+
+public:
+    // Переменные для определения ANSI escape-кодов
+    // Сброс всех атрибутов
+    const std::string reset = "\033[0m";
+
+    // Цвета текста
+    const std::string red = "\033[31m";
+    const std::string magenta = "\033[35m";
+    const std::string green = "\033[32m";
+    
+    // Стиль текста
+    const std::string bold = "\033[1m";
 };
