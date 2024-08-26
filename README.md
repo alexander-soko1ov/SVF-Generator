@@ -2,29 +2,38 @@
 Библиотека для работы с файлами формата .bsd (JTAG) предназначенными для описания цепей boundary scan устройств. Он содержит информацию о конфи>
 Библиотека решает задачи по созданию .svf из файла .bsd (описание цепей тестирования) и .json (описание тестов, которые необходимо провести).
 
-## Формат ввода данных в программный модуль svf-calc
+## Формат ввода данных в программный модуль svf-calculator
 ```
-./name --filename filename_json   
-       --pins  pin-name1[, pin-name2[, pin-name3[...]]]
-       --write "pin_status_1, ...,pin_status_n"
-       --read  "pin_status_1, ...,pin_status_n"
-```
-
-## Пример ввода данных в программный модуль svf-calc
-```
-./main --filename "STM32F1_Low_density_QFPN36.bsd" --pins "PA8,PA3,PB6"         --write "1,1,0"     --read "x,x,1" --pins "PA8,PA3,PB6,PB4,PB5" --write "1,z,z,0,z" --read "x,x,0,1,x" --pins "PA2,PA1,PB2,PB4"     --write "z,1,1,0"   --read "1,0,x,x"
+Параметры:
+  -f, --filename    Указание имени итогового JSON-файла.
+                    Возможные расширения .json, [.bsdl, .bsd] - будут преобразованы в namefile_test.json 
+  -p, --pins        Указание имеён выбранных пинов pin_1, [pin_2, [pin_3, [...]]]
+  -w, --write       Указание имеён выбранных пинов write_1, [write_2, [write_3, [...]]]. Допустимые состояния: 1, 0, z
+  -r, --read        Указание имеён выбранных пинов read_1, [read_2, [read_3, [...]]]. Допустимые состояния: 1, 0, x
+  -h, --help        Отображение этого справочного сообщения
 ```
 
-## Формат ввода данных в программный модуль svf-generator_v2
+## Пример ввода данных в программный модуль svf-calculator
 ```
-./name -b (--bsdl) name BSDL-file
-       -j (--json) name JSON-file
-       -t (--trst) {"ON", "OFF", "z", "ABSENT"}
-       -i (--endir) {"IRPAUSE", "DRPAUSE", "RESET", "IDLE"}
-       -d (--enddr) {"IRPAUSE", "DRPAUSE", "RESET", "IDLE"}
+./svf-calc  -f STM32F1_Low_density_QFPN36_test.json -p PA8 -w 1 -r x -p PA8 -w 0 -r 0
 ```
 
-## Пример ввода данных в программный модуль svf-generator_v2
+## Формат ввода данных в программный модуль svf-generator
 ```
-./main -b STM32F1_Low_density_QFPN36.bsd -j STM32F1_Low_density_QFPN36_test.json -i RESET -d DRPAUSE -t ON
+Основные параметры:
+  -b, --bsdl     Указание имени BSDL-файла. Допустимые расширения: .bsd, .bsdl
+  -j, --json     Указание имени JSON-файла. Допустимое расширение: .json
+
+Дополнительные параметры:
+  -s, --svf      Указание имени SVF-файла. Допустимое расширение: .svf
+  -t, --trst     Состояние TRST. Допустимые состояния: ON, OFF, z, ABSENT
+  -i, --endir    Состояние ENDIR. Допустимые состояния: IRPAUSE, DRPAUSE, RESET, IDLE
+  -d, --enddr    Состояние ENDDR. Допустимые состояния: IRPAUSE, DRPAUSE, RESET, IDLE
+  -r, --runtest  Указание количества тиков ожидания. По умолчанию 100 TCK
+  -h, --help     Отображение этого справочного сообщения
+```
+
+## Пример ввода данных в программный модуль svf-generator
+```
+./svf-gen -b STM32F1_Low_density_QFPN36.bsdl -j STM32F1_Low_density_QFPN36_test.json -i RESET -d DRPAUSE -r 200
 ```

@@ -18,16 +18,17 @@ const std::string bold = "\033[1m";
 
 // Функция вывода help
 void print_usage() {
-    std::cout << "Usage: program [options]\n"
-            << "Options:\n"
-            << "  -b, --bsdl     Add a BSDL-file\n"
-            << "  -j, --json     Add a JSON-file\n"
-            << "  -s, --svf      Add a SVF-file\n"
-            << "  -t, --trst     Set the TRST state (ON, OFF, z, ABSENT)\n"
-            << "  -i, --endir    Set the ENDIR state (IRPAUSE, DRPAUSE, RESET, IDLE)\n"
-            << "  -d, --enddr    Set the ENDDR state (IRPAUSE, DRPAUSE, RESET, IDLE)\n"
-            << "  -r, --runtest  Number of clock cycles (def 100 TCK)\n"
-            << "  -h, --help     Show this help message\n";
+    std::cout << "Usage: svf-gen [паметры] source destination\n"
+            << "Основные параметры:\n"
+            << "  -b, --bsdl     Указание имени BSDL-файла. Допустимые расширения: .bsd, .bsdl\n"
+            << "  -j, --json     Указание имени JSON-файла. Допустимое расширение: .json\n"
+            << "\nДополнительные параметры:\n"
+            << "  -s, --svf      Указание имени SVF-файла. Допустимое расширение: .svf\n"
+            << "  -t, --trst     Состояние TRST. Допустимые состояния: ON, OFF, z, ABSENT\n"
+            << "  -i, --endir    Состояние ENDIR. Допустимые состояния: IRPAUSE, DRPAUSE, RESET, IDLE\n"
+            << "  -d, --enddr    Состояние ENDDR. Допустимые состояния: IRPAUSE, DRPAUSE, RESET, IDLE\n"
+            << "  -r, --runtest  Указание количества тиков ожидания. По умолчанию 100 TCK\n"
+            << "  -h, --help     Отображение этого справочного сообщения\n\n";
 }
 
 // Функция проверки корректности id введённого в CLI аргументов
@@ -161,7 +162,7 @@ int main(int argc, char *argv[]) {
 
     // Получаем вектор пинов
     const std::vector<BsdlPins::PinInfo>& cells = BsdlPins.getCells();
-    const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins();
+    // const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins(); // Пока что отключено за ненадобностью
 
     // Выводим информацию о ячейках и пинах
     // std::cout << "\nВывод ячеек:\n";

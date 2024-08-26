@@ -19,13 +19,14 @@ const std::string bold = "\033[1m";
 
 // Функция вывода help
 void print_help() {
-    std::cout << "Usage: program [options]\n"
-            << "Options:\n"
-            << "  -f, --filename    Add a name file\n"
-            << "  -p, --pins        The name of the required pins\n"
-            << "  -w, --write       Input (1, 0, z)\n"
-            << "  -r, --read        Output (1, 0, x)\n"
-            << "  -h, --help        Show this help message\n";
+    std::cout << "Usage: svf-gen [паметры] source destination\n"
+            << "Параметры:\n"
+            << "  -f, --filename    Указание имени итогового JSON-файла.\n"
+            << "                    Возможные расширения .json, [.bsdl, .bsd] - будут преобразованы в namefile_test.json \n"
+            << "  -p, --pins        Указание имеён выбранных пинов pin_1, [pin_2, [pin_3, [...]]]\n"
+            << "  -w, --write       Указание имеён выбранных пинов write_1, [write_2, [write_3, [...]]]. Допустимые состояния: 1, 0, z\n"
+            << "  -r, --read        Указание имеён выбранных пинов read_1, [read_2, [read_3, [...]]]. Допустимые состояния: 1, 0, x\n"
+            << "  -h, --help        Отображение этого справочного сообщения\n\n";
 }
 
 // Функция парсящая аргументы из командной строки
