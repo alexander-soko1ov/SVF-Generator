@@ -24,10 +24,10 @@ public:
     std::string runtest_state = "100";
 
     enum class StatePin {
-        high, 
-        low,
-        z,
-        x
+        HIGH, 
+        LOW,
+        Z,
+        X
     };
 
     std::string pin_name;

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <string_view> // Подключаем string_view
 
 // Структура для хранения информации о порте и ячейках
 class BsdlPins{
@@ -10,10 +11,15 @@ public:
     class PinInfo {
     public:
         enum class StatePin {
-            high, 
-            low,
-            z,
-            x
+            HIGH, 
+            LOW,
+            Z,
+            X,
+            PULL0,  // A weak “0” external pull down
+            PULL1,  // A weak “1” external pull up
+            WEAK0,  // A weak “0” internal pull down
+            WEAK1,  // A weak “1” internal pull up
+            KEEPER, // “Сохраненная” память состояния последнего сильно управляемого логического состояния
         };
 
         std::string pin;       // номер физического пина, 0 для не выведенных пинов
@@ -47,10 +53,10 @@ public:
     }
 
     // Метод для парсинга данных о длине регистра BSDL
-    unsigned int boundaryLength(const std::string& filename);
+    size_t boundaryLength(const std::string& filename);
 
     // Метод для парсинга данных о длине регистра инструкций
-    unsigned int instructionLength(const std::string& filename);
+    size_t instructionLength(const std::string& filename);
 
     // Метод для парсинга данных битовой маски для запуска EXTEST
     std::string opcodeEXTEST(const std::string& filename, const size_t& register_length_instr);
@@ -78,6 +84,9 @@ public:
     // Функция для вывода информации о пинах
     // void printPinInfo(std::ostream &os=std::cout);
     void printPinInfo(const std::vector<BsdlPins::PinInfo>& pins) const;
+
+    // Функция для приведения строк к нижнему регистру
+    static std::string toLowerCase(const std::string& input);
 
 protected:
     // Защищенные методы для выполнения операций

@@ -3,6 +3,9 @@
 #include <regex>
 #include <vector>
 #include <string>
+#include <algorithm> // Для std::transform
+#include <cctype>    // Для std::tolower
+#include <string_view> // Подключаем string_view
 #include <unordered_map>
 
 #include "pininfo.hpp"
@@ -14,9 +17,9 @@ bool BsdlPins::stringToBool(const std::string& str) {
 }
 
 // Функция для парсинга данных о длине регистра BSDL
-unsigned int BsdlPins::boundaryLength(const std::string& filename) {
+size_t BsdlPins::boundaryLength(const std::string& filename) {
     std::string content = readFile(filename);
-    unsigned int register_length_bsdl;
+    size_t register_length_bsdl = 0;
 
     std::regex reglenRegex(R"(BOUNDARY_LENGTH.*entity\s+is\s+(\d+);)");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), reglenRegex);
@@ -31,9 +34,9 @@ unsigned int BsdlPins::boundaryLength(const std::string& filename) {
 }
 
 // Функция для парсинга данных о длине регистра инструкций
-unsigned int BsdlPins::instructionLength(const std::string& filename) {
+size_t BsdlPins::instructionLength(const std::string& filename) {
     std::string content = readFile(filename);
-    unsigned int register_length_instr;
+    size_t register_length_instr = 0;
 
     std::regex reglenRegex(R"(INSTRUCTION_LENGTH.*entity\s+is\s+(\d+);)");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), reglenRegex);
@@ -89,13 +92,23 @@ std::string BsdlPins::readFile(const std::string& filename_bsdl) {
 // Функция для преобразования строки в StatePin
 BsdlPins::PinInfo::StatePin BsdlPins::PinInfo::stringToStatePin(const std::string& stateStr) {
     if (stateStr == "1") {
-        return StatePin::high;
+        return StatePin::HIGH;
     } else if (stateStr == "0") {
-        return StatePin::low;
+        return StatePin::LOW;
     } else if (stateStr == "Z") {
-        return StatePin::z;
+        return StatePin::Z;
     } else if (stateStr == "X") {
-        return StatePin::x;
+        return StatePin::X;
+    } else if (stateStr == "WEAK0") {
+        return StatePin::WEAK0;
+    } else if (stateStr == "WEAK1") {
+        return StatePin::WEAK1;
+    } else if (stateStr == "PULL0") {
+        return StatePin::PULL0;
+    }  else if (stateStr == "PULL1") {
+        return StatePin::PULL1;
+    }  else if (stateStr == "KEEPER") {
+        return StatePin::KEEPER;
     }
     std::cerr << "Ошибка: недопустимое значение строки для StatePin: " << stateStr << std::endl;
     throw std::invalid_argument("Invalid state pin string: " + stateStr);
@@ -104,18 +117,38 @@ BsdlPins::PinInfo::StatePin BsdlPins::PinInfo::stringToStatePin(const std::strin
 // Функция для преобразования StatePin в строку
 std::string BsdlPins::PinInfo::statePinToString(StatePin state) {
     switch (state) {
-        case StatePin::high:
+        case StatePin::HIGH:
             return "1";
-        case StatePin::low:
+        case StatePin::LOW:
             return "0";
-        case StatePin::z:
-            return "z";
-        case StatePin::x:
-            return "x";
+        case StatePin::Z:
+            return "Z";
+        case StatePin::X:
+            return "X";
+        case StatePin::PULL0:
+            return "PULL0";
+        case StatePin::PULL1:
+            return "PULL1";
+        case StatePin::WEAK0:
+            return "WEAK0";
+        case StatePin::WEAK1:
+            return "WEAK1";
+        case StatePin::KEEPER:
+            return "KEEPER";
         default:
             return "unknown";
     }
 }
+
+// Функция для приведения строк к нижнему регистру
+std::string BsdlPins::toLowerCase(const std::string& input) {
+    std::string result = input; // Создаем копию исходной строки
+    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+    return result;
+}
+
 
 // Функция для парсинга строки с описанием пина
 BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
@@ -131,12 +164,12 @@ BsdlPins::PinInfo BsdlPins::parsePinInfo(const std::string& line) {
         match[7].str().empty() ? pinInfo.turnOff = 0 : pinInfo.turnOff = stringToBool(match[7].str()); 
         match[8].str().empty() ? pinInfo.stateOff : pinInfo.stateOff = PinInfo::stringToStatePin(match[8].str()); 
 
-        if (match[4].str() == "INPUT") {
+        if (toLowerCase(match[4].str()) == "input") {
             pinInfo.In = std::stoi(match[1].str());
             match[6].str().empty() ?  pinInfo.Config = 0 : pinInfo.Config = std::stoi(match[6].str());
             match[7].str().empty() ?  pinInfo.turnOff = 0 : pinInfo.turnOff = std::stoi(match[7].str());
             pinInfo.Out = 0;
-        } else if (match[4].str() == "OUTPUT3") {
+        } else if (toLowerCase(match[4].str()) == "output3") {
             pinInfo.Out = std::stoi(match[1].str());
             match[6].str().empty() ? pinInfo.Config = 0 : pinInfo.Config = std::stoi(match[6].str());
             match[7].str().empty() ?  pinInfo.turnOff = 0 : pinInfo.turnOff = std::stoi(match[7].str());
@@ -206,7 +239,7 @@ std::vector<BsdlPins::PinInfo> BsdlPins::removeDuplicatePins(const std::vector<P
         if (pinMap.find(pin.pin) == pinMap.end()) {
             pinMap[pin.pin] = pin;
         } else {
-            if (pin.function == "INPUT" && pinMap[pin.pin].function == "OUTPUT3") {
+            if (toLowerCase(pin.function) == "input" && toLowerCase(pinMap[pin.pin].function) == "output3") {
                 pinMap[pin.pin].In = pin.In;
             }
         }

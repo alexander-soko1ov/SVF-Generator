@@ -40,13 +40,13 @@ bool PinJson::svfGen(std::string& filename_json){
 // Функция для преобразования строки в значение StatePin
 PinJson::StatePin PinJson::string_to_statepin(const std::string& value) {
     if (value == "1" || value == "high") {
-        return StatePin::high;
+        return StatePin::HIGH;
     } else if (value == "0" || value == "low") {
-        return StatePin::low;
+        return StatePin::LOW;
     } else if (value == "z") {
-        return StatePin::z;
-    } else if (value == "x") {
-        return StatePin::x;
+        return StatePin::Z;
+    } else if (value == "X") {
+        return StatePin::X;
     } else {
         throw std::invalid_argument("Неизвестное значение для StatePin: " + value);
     }
@@ -55,10 +55,10 @@ PinJson::StatePin PinJson::string_to_statepin(const std::string& value) {
 // Функция для преобразования StatePin в строку
 std::string PinJson::statepin_to_string(StatePin state) {
     switch (state) {
-        case StatePin::high: return "1";
-        case StatePin::low: return "0";
-        case StatePin::z: return "z";
-        case StatePin::x: return "x";
+        case StatePin::HIGH: return "1";
+        case StatePin::LOW: return "0";
+        case StatePin::Z: return "Z";
+        case StatePin::X: return "X";
         default: throw std::invalid_argument("Неизвестное значение StatePin");
     }
 }
@@ -203,7 +203,8 @@ void PinJson::genPinTdi(mpz_class& bitmask, const size_t& register_length_bsdl,
             
             if(cells[i].label == pins_svf[temp_index].pin_name){ 
                 
-                if((cells[i].function == "OUTPUT") || (cells[i].function == "OUTPUT2") || (cells[i].function == "OUTPUT3") || (cells[i].function == "BIDIR") ){
+                if((BsdlPins::toLowerCase(cells[i].function) == "output") || (BsdlPins::toLowerCase(cells[i].function) == "output2") 
+                || (BsdlPins::toLowerCase(cells[i].function) == "output3") || (BsdlPins::toLowerCase(cells[i].function) == "bidir") ){
 
                     if (statepin_to_string(pins_svf[temp_index].cell_write) != "z"){
                         // std::cout << magenta << "найдено совпадение!" << "  cells:  " << cells[i].cell << "     pins_svf " << pins_svf[temp_index].pin_name << reset << std::endl; 
@@ -248,7 +249,7 @@ void PinJson::genPinTdo(mpz_class& bitmask, const size_t& register_length_bsdl,
             
             if(cells[i].label == pins_svf[temp_index].pin_name){
 
-                if((cells[i].function == "INPUT") || (cells[i].function == "BIDIR")){
+                if((BsdlPins::toLowerCase(cells[i].function) == "input") || (BsdlPins::toLowerCase(cells[i].function) == "bidir")){
                     
                     if(statepin_to_string(pins_svf[temp_index].cell_read) == "1"){
 
@@ -258,7 +259,7 @@ void PinJson::genPinTdo(mpz_class& bitmask, const size_t& register_length_bsdl,
                         
                         // std::cout << magenta << "  cells:  " << cells[i].cell << "  " << cells[i].In << "     pins_svf " << pins_svf[temp_index].pin_name << reset << std::endl;
                         bitmask &= ~(mpz_class(1) << cells[i].In); 
-                    } else if(statepin_to_string(pins_svf[temp_index].cell_read) == "x"){
+                    } else if(statepin_to_string(pins_svf[temp_index].cell_read) == "X"){
                         
                         // std::cout << magenta << "  cells:  " << cells[i].cell << "  " << cells[i].In << "     pins_svf " << pins_svf[temp_index].pin_name << reset << std::endl;
                         return;
@@ -289,9 +290,9 @@ void PinJson::genPinMask(mpz_class& bitmask, const size_t& register_length_bsdl,
             
             if(cells[i].label == pins_svf[temp_index].pin_name) {
                
-                if((cells[i].function == "INPUT") || (cells[i].function == "BIDIR")) {
+                if((BsdlPins::toLowerCase(cells[i].function) == "input") || (BsdlPins::toLowerCase(cells[i].function) == "bidir")) {
 
-                    if(statepin_to_string(pins_svf[temp_index].cell_read) == "x") {
+                    if(statepin_to_string(pins_svf[temp_index].cell_read) == "X") {
                         // std::cout << "найдено совпадение!   "  << cells[i].label << "     " << cells[i].cell << "    " << statepin_to_string(pins_svf[temp_index].cell_read) << std::endl;
                         bitmask &= ~(mpz_class(1) << cells[i].cell);
                     } else {
@@ -314,17 +315,23 @@ void PinJson::safeValues(mpz_class& bitmask, const size_t& register_length_bsdl,
     } else {
        for(size_t i = 0; i < register_length_bsdl; ++i){
         
-            if((cells[i].function == "OUTPUT") || (cells[i].function == "OUTPUT2") || (cells[i].function == "OUTPUT3") 
-                || (cells[i].function == "BIDIR")){
+            if((BsdlPins::toLowerCase(cells[i].function) == "output") || (BsdlPins::toLowerCase(cells[i].function) == "output2") 
+                || (BsdlPins::toLowerCase(cells[i].function) == "output3") || (BsdlPins::toLowerCase(cells[i].function) == "bidir")){
                 
+                // std::cout << cells[i].label  << "   " << BsdlPins::toLowerCase(cells[i].function) << "  " << " Safe State: " << BsdlPins::PinInfo::statePinToString(cells[i].safeState) << std::endl;
+
                 if(BsdlPins::PinInfo::statePinToString(cells[i].safeState) == "1"){
+                    
                     bitmask |= (mpz_class(1) << cells[i].cell);   
                 } else if (BsdlPins::PinInfo::statePinToString(cells[i].safeState) == "0"){
+                    
                     bitmask |= (mpz_class(0) << cells[i].cell); 
-                } else if (BsdlPins::PinInfo::statePinToString(cells[i].safeState) == "x"){
-                    // std::cout << cells[i].label  << "   " << cells[i].function << "  " << " Control Pin: " << cells[i].Config << std::endl;
+                } else if (BsdlPins::PinInfo::statePinToString(cells[i].safeState) == "X"){
+                    
+                   
                     bitmask |= (mpz_class(cells[i].turnOff) << cells[i].Config); 
                 } else {
+                    
                     std::cerr << red << "Неверное безопасное состояние!" << reset << std::endl;
                 }  
             }

@@ -1,13 +1,16 @@
 # Устанавливаем минимальную версию CMake, необходимую для сборки проекта
 cmake_minimum_required(VERSION 3.17)
 
+# Устанавливаем уровень оптимизации для всего проекта
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+
 # Поиск программы clang-tidy в системе. Если clang-tidy найден, он будет использоваться для статического анализа кода.
-# find_program(CLANG_TIDY clang-tidy clang-tidy-14 clang-tidy-15)
-# if(CLANG_TIDY)
-#     # Если clang-tidy был найден, указываем CMake использовать clang-tidy для C и C++ файлов
-#     set(CMAKE_C_CLANG_TIDY ${CLANG_TIDY})
-#     set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY})
-# endif()
+find_program(CLANG_TIDY clang-tidy clang-tidy-14 clang-tidy-15)
+if(CLANG_TIDY)
+    # Если clang-tidy был найден, указываем CMake использовать clang-tidy для C и C++ файлов
+    set(CMAKE_C_CLANG_TIDY ${CLANG_TIDY})
+    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY})
+endif()
 
 # Устанавливаем имя проекта и указываем, что проект использует C++ (по умолчанию это CXX)
 project(pininfoProject CXX)
@@ -49,7 +52,7 @@ target_link_libraries(svf-gen PRIVATE svf-generator pininfo gmp gmpxx)
 
 # Устанавливаем опции компилятора для исполняемого файла svf-gen:
 # - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
-target_compile_options(svf-gen PRIVATE -g3)
+target_compile_options(svf-gen PRIVATE -g3 -O3)
 
 # Создаем исполняемый файл с именем svf-calc из исходного файла svf-calc.cpp
 add_executable(svf-calc
@@ -61,4 +64,4 @@ target_link_libraries(svf-calc PRIVATE svf-calculator)
 
 # Устанавливаем опции компилятора для исполняемого файла svf-calc:
 # - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
-target_compile_options(svf-calc PRIVATE -g3)
+target_compile_options(svf-calc PRIVATE -g3 -O2)
