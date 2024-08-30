@@ -45,7 +45,7 @@ PinJson::StatePin PinJson::string_to_statepin(const std::string& value) {
         return StatePin::LOW;
     } else if (value == "z") {
         return StatePin::Z;
-    } else if (value == "X") {
+    } else if (value == "x") {
         return StatePin::X;
     } else {
         throw std::invalid_argument("Неизвестное значение для StatePin: " + value);
@@ -95,6 +95,14 @@ std::vector<PinJson> PinJson::process_json(const json& jfile, std::vector<size_t
     std::vector<PinJson> pins;
 
     for (const auto& item : jfile) {
+
+        if (!item.contains("pins") || !item.contains("read") || !item.contains("write") || 
+            !item["pins"].is_array() || !item["read"].is_array() || !item["write"].is_array()) {
+            
+            std::cerr << "Отсутствуют или некорректны данные в JSON!" << std::endl;
+            return {}; // Возвращаем пустой вектор
+        }
+
         const auto& pin_names = item["pins"];
         const auto& read_values = item["read"];
         const auto& write_values = item["write"];
@@ -103,18 +111,19 @@ std::vector<PinJson> PinJson::process_json(const json& jfile, std::vector<size_t
         size_t num_pins = pin_names.size();
         pin_counts.push_back(num_pins); // Сохраняем количество пинов
 
-        size_t num_reads = read_values.size();
-        size_t num_writes = write_values.size();
+        // size_t num_reads = read_values.size();
+        // size_t num_writes = write_values.size();
 
         // Вывод количества элементов
         // std::cout << "Количество пинов: " << num_pins << std::endl;
         // std::cout << "Количество значений read: " << num_reads << std::endl;
         // std::cout << "Количество значений write: " << num_writes << std::endl;
 
-        if (num_pins != num_reads || num_pins != num_writes) {
-            std::cerr << "Несоответствие размеров в JSON!" << std::endl;
-            throw std::runtime_error("Несоответствие размеров в JSON!");
-        }
+        if (!item.contains("pins") || !item.contains("read") || !item.contains("write") || 
+            !item["pins"].is_array() || !item["read"].is_array() || !item["write"].is_array()) {
+            
+            throw std::runtime_error("Отсутствуют или некорректны данные в JSON!");
+        }   
 
         for (size_t i = 0; i < num_pins; ++i) {
             PinJson pin;
@@ -138,7 +147,11 @@ json PinJson::read_json_file(const std::string& filename) {
     }
 
     json jfile;
-    input_file >> jfile;
+    try {
+        input_file >> jfile;
+    } catch (const nlohmann::json::parse_error& e) {
+        throw std::runtime_error("Ошибка парсинга JSON: " + std::string(e.what()));
+    }
     return jfile;
 }
 
@@ -151,6 +164,11 @@ void PinJson::print_pins() {
     for(auto& pin_count : pin_counts){
         for(size_t i = 0; i < pin_count; ++i){
             
+            if (index >= pins_svf.size()) {
+                std::cerr << "Ошибка: индекс выходит за рамки массива pins_svf!" << std::endl;
+                abort();
+            }
+
             const auto& pin = pins_svf[index++];
 
             std::cout << "Pin: " << pin.pin_name 
@@ -168,8 +186,7 @@ std::string PinJson::replaceExtension(const std::string& filename, const std::st
     if (pos != std::string::npos && pos == filename.length() - oldExt.length()) {
         return filename.substr(0, pos) + newExt;
     } else {
-        std::cerr << "Некорретное раcширение файла: " << filename << std::endl;
-        exit(1);
+        throw std::runtime_error("Некорректное расширение файла: " + filename);
     }
 }
 
@@ -199,12 +216,17 @@ void PinJson::genPinTdi(mpz_class& bitmask, const size_t& register_length_bsdl,
 
     for (size_t j = 0; j < pin_counts[count_out]; ++j) {
 
+        if (temp_index >= pins_svf.size()) {
+            std::cerr << red << "Индекс temp_index выходит за пределы массива pins_svf!" << reset << std::endl;
+            abort();
+        }
+
         for(size_t i = 0; i < register_length_bsdl; ++i){
             
             if(cells[i].label == pins_svf[temp_index].pin_name){ 
                 
                 if((BsdlPins::toLowerCase(cells[i].function) == "output") || (BsdlPins::toLowerCase(cells[i].function) == "output2") 
-                || (BsdlPins::toLowerCase(cells[i].function) == "output3") || (BsdlPins::toLowerCase(cells[i].function) == "bidir") ){
+                    || (BsdlPins::toLowerCase(cells[i].function) == "output3") || (BsdlPins::toLowerCase(cells[i].function) == "bidir") ){
 
                     if (statepin_to_string(pins_svf[temp_index].cell_write) != "z"){
                         // std::cout << magenta << "найдено совпадение!" << "  cells:  " << cells[i].cell << "     pins_svf " << pins_svf[temp_index].pin_name << reset << std::endl; 
@@ -402,23 +424,22 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
         
         index += pin_counts[count_out];
 
-        // std::cout << red << index << reset << std::endl;
+        std::cout << red << index << reset << std::endl;
         
         // Тестовый вывод битовых полей в 2-ой или 16-ричной системе исчисления
+        std::cout << "Тестовый вывод битовых полей в " << out_format << " формате для блока номер " << count_out << ":   " << std::endl;
         if(out_format == 2){
-            std::cout << "Тестовый вывод битовых полей для блока номер " << count_out << ":   " << std::endl;
             std::cout << "Поле TDI:     " << green << output_str(pin_tdi, register_length_bsdl) << reset << std::endl;
             std::cout << "Поле TDO:     " << green << output_str(pin_tdo, register_length_bsdl) << reset << std::endl;
             std::cout << "Поле MASK:    " << green << output_str(pin_mask, register_length_bsdl) << reset  << std::endl;
             std::cout << "\n";
 
-        } else if(out_format == 16){        
-            std::cout << "Тестовый вывод битовых полей для блока номер " << count_out << ":   " << std::endl;
-            std::cout << "Поле TDI:     " << green << pin_tdi.get_str(16) << reset << std::endl;
-            std::cout << "Поле TDO:     " << green << pin_tdo.get_str(16) << reset << std::endl;
-            std::cout << "Поле MASK:    " << green << pin_mask.get_str(16)<< reset  << std::endl;
+        } else {
+            std::cout << "Поле TDI:     " << green << pin_tdi.get_str(out_format) << reset << std::endl;
+            std::cout << "Поле TDO:     " << green << pin_tdo.get_str(out_format) << reset << std::endl;
+            std::cout << "Поле MASK:    " << green << pin_mask.get_str(out_format)<< reset  << std::endl;
             std::cout << "\n";
-        }
+        } 
 
         // Запись строки битовой маски в файл
         svfFile << "SDR " << register_length_bsdl << " TDI (" << pin_tdi.get_str(16) <<  ") TDO (" 

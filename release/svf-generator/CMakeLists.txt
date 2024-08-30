@@ -2,14 +2,42 @@
 cmake_minimum_required(VERSION 3.17)
 
 # Устанавливаем уровень оптимизации для всего проекта
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g")
 
 # Поиск программы clang-tidy в системе. Если clang-tidy найден, он будет использоваться для статического анализа кода.
-find_program(CLANG_TIDY clang-tidy clang-tidy-14 clang-tidy-15)
-if(CLANG_TIDY)
-    # Если clang-tidy был найден, указываем CMake использовать clang-tidy для C и C++ файлов
-    set(CMAKE_C_CLANG_TIDY ${CLANG_TIDY})
-    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY})
+# find_program(CLANG_TIDY clang-tidy clang-tidy-14 clang-tidy-15)
+# if(CLANG_TIDY)
+#     # Если clang-tidy был найден, указываем CMake использовать clang-tidy для C и C++ файлов
+#     set(CMAKE_C_CLANG_TIDY ${CLANG_TIDY})
+#     set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY})
+# endif()
+
+# Поиск и запуск clang static analyzer
+find_program(SCAN_BUILD scan-build) # для запуска статического анализатора необходимо использовать конструкцию scan-build ninja -v -C build 
+if(SCAN_BUILD)
+    set(CMAKE_C_COMPILER "${SCAN_BUILD} clang")
+    set(CMAKE_CXX_COMPILER "${SCAN_BUILD} clang++")
+endif()
+
+# Поиск и запуск Cppcheck
+find_program(CPPCHECK cppcheck)
+if(CPPCHECK)
+    set(CPPCHECK_COMMAND
+        ${CPPCHECK}
+        --enable=all
+        --inconclusive
+        --language=c++
+        --std=c++17
+        --suppress=missingIncludeSystem
+        --quiet
+        ${PROJECT_SOURCE_DIR}
+    )
+
+    add_custom_target(
+        cppcheck
+        COMMAND ${CPPCHECK_COMMAND}
+        COMMENT "Running Cppcheck"
+    )
 endif()
 
 # Устанавливаем имя проекта и указываем, что проект использует C++ (по умолчанию это CXX)
@@ -64,4 +92,4 @@ target_link_libraries(svf-calc PRIVATE svf-calculator)
 
 # Устанавливаем опции компилятора для исполняемого файла svf-calc:
 # - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
-target_compile_options(svf-calc PRIVATE -g3 -O2)
+target_compile_options(svf-calc PRIVATE -g3 -O3)

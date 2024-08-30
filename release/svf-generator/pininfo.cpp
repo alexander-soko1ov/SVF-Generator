@@ -47,6 +47,8 @@ size_t BsdlPins::instructionLength(const std::string& filename) {
         register_length_instr = std::stoi(match[1].str());
     }
 
+    // std::cout << magenta << "register_length_instr: " << register_length_instr << reset << std::endl;
+
     return register_length_instr;
 }
 
@@ -68,6 +70,8 @@ std::string BsdlPins::opcodeEXTEST(const std::string& filename, const size_t& re
         std::cerr << red << "Несоответствие длины регистра инструкций и команды EXTEST" << reset << std::endl;
         abort();
     }
+
+    // std::cout << magenta << "opcode_extest: " << opcode_extest << reset << std::endl;
 
     return opcode_extest;
 }
@@ -91,23 +95,23 @@ std::string BsdlPins::readFile(const std::string& filename_bsdl) {
 
 // Функция для преобразования строки в StatePin
 BsdlPins::PinInfo::StatePin BsdlPins::PinInfo::stringToStatePin(const std::string& stateStr) {
-    if (stateStr == "1") {
+    if (toLowerCase(stateStr) == "1") {
         return StatePin::HIGH;
-    } else if (stateStr == "0") {
+    } else if (toLowerCase(stateStr) == "0") {
         return StatePin::LOW;
-    } else if (stateStr == "Z") {
+    } else if (toLowerCase(stateStr) == "z") {
         return StatePin::Z;
-    } else if (stateStr == "X") {
+    } else if (toLowerCase(stateStr) == "x") {
         return StatePin::X;
-    } else if (stateStr == "WEAK0") {
+    } else if (toLowerCase(stateStr) == "weak0") {
         return StatePin::WEAK0;
-    } else if (stateStr == "WEAK1") {
+    } else if (toLowerCase(stateStr) == "weak1") {
         return StatePin::WEAK1;
-    } else if (stateStr == "PULL0") {
+    } else if (toLowerCase(stateStr) == "pull0") {
         return StatePin::PULL0;
-    }  else if (stateStr == "PULL1") {
+    }  else if (toLowerCase(stateStr) == "pull1") {
         return StatePin::PULL1;
-    }  else if (stateStr == "KEEPER") {
+    }  else if (toLowerCase(stateStr) == "keeper") {
         return StatePin::KEEPER;
     }
     std::cerr << "Ошибка: недопустимое значение строки для StatePin: " << stateStr << std::endl;

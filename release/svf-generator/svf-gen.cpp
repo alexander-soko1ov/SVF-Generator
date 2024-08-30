@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
     // BsdlPins.printPinInfo(cells);
     // 
     // std::cout << "\nВывод пинов:\n";
-    BsdlPins.printPinInfo(pins);
+    // BsdlPins.printPinInfo(pins);
 
     // Читаем данные из JSON и записываем их в переменные
     PinJson.svfGen(PinJson.filename_json);
@@ -180,6 +180,8 @@ int main(int argc, char *argv[]) {
 
     // Выводим пины, записанные в JSON-файле
     PinJson.print_pins();
+
+    // std::cout << magenta << "createFile:" << reset << std::endl;
 
     // Создаём SVF-файл 
     PinJson.createFile(PinJson.filename_json, register_length_bsdl, PinJson.filename_svf, register_length_instr, opcode_extest, 
