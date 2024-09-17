@@ -42,13 +42,21 @@ bool is_valid_state(const std::string& state, const std::string valid_states[], 
 }
 
 // Функция проверки расширения файла
+// bool has_extension(const std::string& filename, const std::unordered_set<std::string>& validExtensions) {
+//     size_t pos = filename.rfind('.');
+//     if (pos != std::string::npos && pos != filename.length() - 1) {
+//         std::string fileExt = filename.substr(pos + 1);
+//         return validExtensions.find(fileExt) != validExtensions.end();
+//     }
+//     return false;
+// }
 bool has_extension(const std::string& filename, const std::unordered_set<std::string>& validExtensions) {
     size_t pos = filename.rfind('.');
-    if (pos != std::string::npos && pos != filename.length() - 1) {
-        std::string fileExt = filename.substr(pos + 1);
-        return validExtensions.find(fileExt) != validExtensions.end();
+    if (pos == std::string::npos || pos == filename.length() - 1) {
+        return false; // Нет расширения
     }
-    return false;
+    std::string fileExt = filename.substr(pos + 1);
+    return validExtensions.find(fileExt) != validExtensions.end();
 }
 
 // Функция для обработки аргументов командной строки
@@ -84,50 +92,64 @@ void parse_arguments(int argc, char *argv[], std::string& filename_bsdl,
     while ((c = getopt_long(argc, argv, "b:j:s:t:i:d:r:h", long_options, &option_index)) != -1) {
         switch (c) {
             case 'b':
+            if(optarg){
                 filename_bsdl = optarg;
                 if (!has_extension(filename_bsdl,{"bsd","bsdl"})) {
                     std::cerr << red << "Неверное расширение BSDL-файла (.bsd)" << reset << std::endl;
                     abort();
                 }
                 break;
+            }
             case 'j':
-                filename_json = optarg;
-                if (!has_extension(filename_json, {"json"})) {
-                    std::cerr << red << "Неверное расширение JSON-файла (.json)" << reset << std::endl;
-                    abort();
+                if(optarg){
+                    filename_json = optarg;
+                    if (!has_extension(filename_json, {"json"})) {
+                        std::cerr << red << "Неверное расширение JSON-файла (.json)" << reset << std::endl;
+                        abort();
+                    }
+                    break;
                 }
-                break;
             case 's':
-                filename_svf = optarg;
-                if (!has_extension(filename_svf, {"svf"})) {
-                    std::cerr << red << "Неверное расширение SVF-файла (.svf)" << reset << std::endl;
-                    abort();
+                if(optarg){
+                    filename_svf = optarg;
+                    if (!has_extension(filename_svf, {"svf"})) {
+                        std::cerr << red << "Неверное расширение SVF-файла (.svf)" << reset << std::endl;
+                        abort();
+                    }
+                    break;
                 }
-                break;
             case 't':
-                trst_state = optarg;
-                if (!is_valid_state(trst_state, trst_states, 4)) {
-                    std::cerr << red << "Неверное состояние --trst. Возможные состояния ON, OFF, Z, or ABSENT." << reset << std::endl;
-                    abort();
+                if(optarg){
+                    trst_state = optarg;
+                    if (!is_valid_state(trst_state, trst_states, 4)) {
+                        std::cerr << red << "Неверное состояние --trst. Возможные состояния ON, OFF, Z, or ABSENT." << reset << std::endl;
+                        abort();
+                    }
+                    break;
                 }
-                break;
             case 'i':
-                endir_state = optarg;
-                if (!is_valid_state(endir_state, endir_enddr_states, 4)) {
-                    std::cerr << red << "Неверное состояние --endir. Возможные состояния IRPAUSE, DRPAUSE, RESET, or IDLE." << reset << std::endl;
-                    abort();
+                if(optarg){
+                    endir_state = optarg;
+                    if (!is_valid_state(endir_state, endir_enddr_states, 4)) {
+                        std::cerr << red << "Неверное состояние --endir. Возможные состояния IRPAUSE, DRPAUSE, RESET, or IDLE." << reset << std::endl;
+                        abort();
+                    }
+                    break;
                 }
-                break;
             case 'd':
-                enddr_state = optarg;
-                if (!is_valid_state(enddr_state, endir_enddr_states, 4)) {
-                    std::cerr << red << "Неверное состояние --enddr. Возможные состояния IRPAUSE, DRPAUSE, RESET, or IDLE." << reset << std::endl;
-                    abort();
+                if(optarg){
+                    enddr_state = optarg;
+                    if (!is_valid_state(enddr_state, endir_enddr_states, 4)) {
+                        std::cerr << red << "Неверное состояние --enddr. Возможные состояния IRPAUSE, DRPAUSE, RESET, or IDLE." << reset << std::endl;
+                        abort();
+                    }
+                    break;
                 }
-                break;
             case 'r':
-                runtest_state = optarg;
-                break;
+                if(optarg){
+                    runtest_state = optarg;
+                    break;
+                }
             case 'h':
                 print_usage();
                 exit(0);
@@ -148,44 +170,44 @@ int main(int argc, char *argv[]) {
     parse_arguments(argc, argv, PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf,
                     PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state);
 
-    // Загружаем BSDL-файл, парсим его и записываем данные в переменные
-    BsdlPins.loadBsdl(PinJson.filename_bsdl);
+    try {
+        // Загружаем BSDL-файл, парсим его и записываем данные в переменные
+        BsdlPins.loadBsdl(PinJson.filename_bsdl);
 
-    // Получаем данные о длине регистра BSDL
-    size_t register_length_bsdl = BsdlPins.boundaryLength(PinJson.filename_bsdl);
+        // Получаем данные о длине регистра BSDL
+        size_t register_length_bsdl = BsdlPins.boundaryLength(PinJson.filename_bsdl);
 
-    // Получаем данные о длине регистра BSDL
-    size_t register_length_instr = BsdlPins.instructionLength(PinJson.filename_bsdl);
+        // Получаем данные о длине регистра BSDL
+        size_t register_length_instr = BsdlPins.instructionLength(PinJson.filename_bsdl);
 
-    // Получаем данные о коде для запуска EXTEST
-    std::string opcode_extest = BsdlPins.opcodeEXTEST(PinJson.filename_bsdl, register_length_instr);    
+        // Получаем данные о коде для запуска EXTEST
+        std::string opcode_extest = BsdlPins.opcodeEXTEST(PinJson.filename_bsdl, register_length_instr);
 
-    // Получаем вектор пинов
-    const std::vector<BsdlPins::PinInfo>& cells = BsdlPins.getCells();
-    const std::vector<BsdlPins::PinInfo>& pins = BsdlPins.getPins(); // Пока что отключено за ненадобностью
+        // Получаем вектор пинов
+        const std::vector<BsdlPins::PinInfo>& cells = BsdlPins.getCells();
+        if (cells.empty()) {
+            throw std::runtime_error("Вектор ячеек пуст");
+        }
 
-    // Выводим информацию о ячейках и пинах
-    // std::cout << "\nВывод ячеек:\n";
-    // BsdlPins.printPinInfo(cells);
-    // 
-    // std::cout << "\nВывод пинов:\n";
-    // BsdlPins.printPinInfo(pins);
+        // Читаем данные из JSON и записываем их в переменные
+        PinJson.svfGen(PinJson.filename_json);
 
-    // Читаем данные из JSON и записываем их в переменные
-    PinJson.svfGen(PinJson.filename_json);
+        // Тестовый вывод пинов из json-файла
+        PinJson.print_json(PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf, 
+                            PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state);
 
-    // Тестовый вывод пинов из json-файла
-    PinJson.print_json(PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf, 
-                        PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state);
+        // Выводим пины, записанные в JSON-файле
+        PinJson.print_pins();
 
-    // Выводим пины, записанные в JSON-файле
-    PinJson.print_pins();
+        // Создаём SVF-файл 
+        PinJson.createFile(PinJson.filename_json, register_length_bsdl, PinJson.filename_svf, register_length_instr, opcode_extest, 
+                            cells, PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state, 2);
 
-    // std::cout << magenta << "createFile:" << reset << std::endl;
-
-    // Создаём SVF-файл 
-    PinJson.createFile(PinJson.filename_json, register_length_bsdl, PinJson.filename_svf, register_length_instr, opcode_extest, 
-                        cells, PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state, 2);
+    } catch (const std::exception& e) {
+        
+        std::cerr << red << "Ошибка при обработке: " << e.what() << reset << std::endl;
+        return 1; // Возвращаем код ошибки
+    }
 
     return 0;
 }

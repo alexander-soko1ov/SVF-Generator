@@ -1,22 +1,33 @@
 # Устанавливаем минимальную версию CMake, необходимую для сборки проекта
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.20)
 
-# Устанавливаем уровень оптимизации для всего проекта
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g")
+# Устанавливаем имя проекта и указываем, что проект использует C++
+project(pininfoProject CXX)
 
-# Поиск программы clang-tidy в системе. Если clang-tidy найден, он будет использоваться для статического анализа кода.
-# find_program(CLANG_TIDY clang-tidy clang-tidy-14 clang-tidy-15)
-# if(CLANG_TIDY)
-#     # Если clang-tidy был найден, указываем CMake использовать clang-tidy для C и C++ файлов
-#     set(CMAKE_C_CLANG_TIDY ${CLANG_TIDY})
-#     set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY})
-# endif()
+# Устанавливаем стандарт C++20
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Поиск и запуск clang static analyzer
-find_program(SCAN_BUILD scan-build) # для запуска статического анализатора необходимо использовать конструкцию scan-build ninja -v -C build 
+# Опции компиляции для различных конфигураций
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Og -g3")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
+set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -Os")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O3 -g3")
+
+# Включаем покрытие кода для профилирования
+option(ENABLE_TEST_COVERAGE "Enable coverage reporting" OFF)
+
+if(ENABLE_TEST_COVERAGE)
+    message(STATUS "Test coverage enabled")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage --coverage")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage --coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage --coverage")
+endif()
+
+# Не меняем компиляторы для scan-build, используем его отдельно
+find_program(SCAN_BUILD scan-build)
 if(SCAN_BUILD)
-    set(CMAKE_C_COMPILER "${SCAN_BUILD} clang")
-    set(CMAKE_CXX_COMPILER "${SCAN_BUILD} clang++")
+    message(STATUS "Found scan-build, but it should be used externally to CMake.")
 endif()
 
 # Поиск и запуск Cppcheck
@@ -36,23 +47,15 @@ if(CPPCHECK)
     add_custom_target(
         cppcheck
         COMMAND ${CPPCHECK_COMMAND}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         COMMENT "Running Cppcheck"
     )
 endif()
 
-# Устанавливаем имя проекта и указываем, что проект использует C++ (по умолчанию это CXX)
-project(pininfoProject CXX)
-
-# Добавляем опции компилятора:
-# - -Wall: Включает все предупреждения компилятора.
-# - -Wextra: Включает дополнительные предупреждения компилятора.
-# - -std=c++20: Устанавливает стандарт C++20 для компиляции.
-add_compile_options(-Wall -Wextra -std=c++20)
-
 # Добавляем директорию с исходниками
 include_directories(${CMAKE_SOURCE_DIR})
 
-# Создаем библиотеку svf-generator из исходных файлов
+# Создаем библиотеки
 add_library(svf-generator STATIC
     svf-generator.cpp
     svf-generator.hpp
@@ -70,26 +73,42 @@ add_library(svf-calculator STATIC
     svf-calculator.hpp
 )
 
-# Создаем исполняемый файл с именем svf-gen из исходного файла svf-gen.cpp
+# Создаем исполняемый файл svf-gen
 add_executable(svf-gen
     svf-gen.cpp
 )
 
-# Связываем исполняемый файл svf-gen с библиотеками svf-generator и pininfo, а также с библиотеками gmp и gmpxx
+# Связываем библиотеки с исполняемым файлом svf-gen
 target_link_libraries(svf-gen PRIVATE svf-generator pininfo gmp gmpxx)
 
-# Устанавливаем опции компилятора для исполняемого файла svf-gen:
-# - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
+# Устанавливаем опции компилятора для svf-gen
 target_compile_options(svf-gen PRIVATE -g3 -O3)
 
-# Создаем исполняемый файл с именем svf-calc из исходного файла svf-calc.cpp
+# Создаем исполняемый файл svf-calc
 add_executable(svf-calc
     svf-calc.cpp
 )
 
-# Связываем исполняемый файл svf-calc с библиотекой svf-calculator
+# Связываем библиотеки с исполняемым файлом svf-calc
 target_link_libraries(svf-calc PRIVATE svf-calculator)
 
-# Устанавливаем опции компилятора для исполняемого файла svf-calc:
-# - -g3: Включает отладочную информацию с максимальным уровнем детализации (уровень 3)
+# Устанавливаем опции компилятора для svf-calc
 target_compile_options(svf-calc PRIVATE -g3 -O3)
+
+# Генерация отчета покрытия кода с использованием lcov и gcov
+if(ENABLE_TEST_COVERAGE)
+    find_program(LCOV_EXECUTABLE lcov)
+    find_program(GENHTML_EXECUTABLE genhtml)
+
+    if(LCOV_EXECUTABLE AND GENHTML_EXECUTABLE)
+        add_custom_target(coverage
+            COMMAND ${LCOV_EXECUTABLE} --capture --directory . --output-file coverage.info
+            COMMAND ${LCOV_EXECUTABLE} --remove coverage.info '/usr/*' --output-file coverage_filtered.info
+            COMMAND ${GENHTML_EXECUTABLE} coverage_filtered.info --output-directory coverage_report
+            COMMENT "Generating coverage report..."
+            VERBATIM
+        )
+    else()
+        message(WARNING "lcov or genhtml not found. Coverage report generation disabled.")
+    endif()
+endif()

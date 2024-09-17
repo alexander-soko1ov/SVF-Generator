@@ -424,7 +424,7 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
         
         index += pin_counts[count_out];
 
-        std::cout << red << index << reset << std::endl;
+        // std::cout << red << index << reset << std::endl;
         
         // Тестовый вывод битовых полей в 2-ой или 16-ричной системе исчисления
         std::cout << "Тестовый вывод битовых полей в " << out_format << " формате для блока номер " << count_out << ":   " << std::endl;

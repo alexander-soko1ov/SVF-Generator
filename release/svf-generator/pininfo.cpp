@@ -82,7 +82,7 @@ std::string BsdlPins::readFile(const std::string& filename_bsdl) {
     BsdlPins BsdlPins;
 
     if(filename_bsdl == "NO FILE"){
-        std::cerr << BsdlPins.red << "Введите имя BSDL-файла!" << BsdlPins.reset << std::endl;
+        std::cerr << BsdlPins.red << "Не подключен файл BSDL" << BsdlPins.reset << std::endl;
         abort();
     }
 
