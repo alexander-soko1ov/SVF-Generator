@@ -401,13 +401,16 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
     // Инициализация переменной index для работы с вектором pins_svf
     size_t index = 0;
 
-    for(size_t count_out = 0; count_out < pin_counts.size(); count_out++){
-        svfFile << "TIR " << register_length_instr << " TDI (" << opcode_extest << ")\n"; 
+    mpz_class opcode_extest_hex(opcode_extest);
+    // std::cout << red << opcode_extest << reset << std::endl;
 
+    for(size_t count_out = 0; count_out < pin_counts.size(); count_out++){
         // Инициализация переменной pinTdi
         mpz_class pin_tdi(0);
         mpz_class pin_tdo(0);
         mpz_class pin_mask(0);
+         
+        svfFile << "SIR " << register_length_instr << " TDI (" << opcode_extest_hex.get_str(16) << ")\n"; 
 
         /* Если нужно сначала залить маску, то сделать переменную равнной 1, а далее нужный 
         бит оставить единицей или сделать нулём (это сделано исходя из той рекомендации от разрабочиков, 

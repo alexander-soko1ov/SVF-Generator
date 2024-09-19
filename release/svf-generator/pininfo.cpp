@@ -223,7 +223,7 @@ std::unordered_map<std::string, std::string> BsdlPins::parsePinTypes(const std::
 // Функция для парсинга файла .bsd и извлечения информации о пинах
 std::vector<BsdlPins::PinInfo> BsdlPins::parseBSDFile(const std::string& content) {
     std::vector<PinInfo> cells;
-    std::regex lineRegex(R"((\d+\s*\(BC_\d+,.*\)))");
+    std::regex lineRegex(R"((\d+\s*\(BC_\w+,.*\)))");
     auto lines_begin = std::sregex_iterator(content.begin(), content.end(), lineRegex);
     auto lines_end = std::sregex_iterator();
 
