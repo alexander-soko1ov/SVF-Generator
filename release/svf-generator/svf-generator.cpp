@@ -444,7 +444,6 @@ void PinJson::createFile(std::string& filename_json, size_t& register_length_bsd
         genPinMask(pin_mask, register_length_bsdl, cells, count_out, index);  
         
         index += pin_counts[count_out];
-
         // std::cout << red << index << reset << std::endl;
         
         // Тестовый вывод битовых полей в 2-ой или 16-ричной системе исчисления
