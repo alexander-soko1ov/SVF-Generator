@@ -28,6 +28,7 @@ void print_usage() {
             << "  -i, --endir    Состояние ENDIR. Допустимые состояния: IRPAUSE, DRPAUSE, RESET, IDLE\n"
             << "  -d, --enddr    Состояние ENDDR. Допустимые состояния: IRPAUSE, DRPAUSE, RESET, IDLE\n"
             << "  -r, --runtest  Указание количества тиков ожидания. По умолчанию 100 TCK\n"
+            << "  -v, --verbose  Подробный вывод информации о данных принятых ПО и выведенных в файл\n"
             << "  -h, --help     Отображение этого справочного сообщения\n\n";
 }
 
@@ -63,7 +64,7 @@ bool has_extension(const std::string& filename, const std::unordered_set<std::st
 void parse_arguments(int argc, char *argv[], std::string& filename_bsdl, 
                     std::string&  filename_json, std::string& filename_svf,
                     std::string& trst_state, std::string& endir_state, 
-                    std::string& enddr_state, std::string& runtest_state){
+                    std::string& enddr_state, bool& verbose, std::string& runtest_state){
 
     // Инициализация вспомагательных переменных
     int option_index = 0;
@@ -80,6 +81,7 @@ void parse_arguments(int argc, char *argv[], std::string& filename_bsdl,
         {"endir", required_argument, 0, 'i'},
         {"enddr", required_argument, 0, 'd'},
         {"runtest", required_argument, 0, 'r'},
+        {"verbose", no_argument, 0, 'v'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -89,7 +91,7 @@ void parse_arguments(int argc, char *argv[], std::string& filename_bsdl,
     const std::string endir_enddr_states[] = {"IRPAUSE", "DRPAUSE", "RESET", "IDLE"};
 
     // Цикл проверки всех переданных аргументов
-    while ((c = getopt_long(argc, argv, "b:j:s:t:i:d:r:h", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "b:j:s:t:i:d:r:vh", long_options, &option_index)) != -1) {
         switch (c) {
             case 'b':
             if(optarg){
@@ -150,6 +152,9 @@ void parse_arguments(int argc, char *argv[], std::string& filename_bsdl,
                     runtest_state = optarg;
                     break;
                 }
+            case 'v':
+                verbose = true;
+                break;
             case 'h':
                 print_usage();
                 exit(0);
@@ -168,7 +173,7 @@ int main(int argc, char *argv[]) {
 
     // Создаём vector для хранения и передачи имён файлов
     parse_arguments(argc, argv, PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf,
-                    PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state);
+                    PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.verbose, PinJson.runtest_state);
 
     try {
         // Загружаем BSDL-файл, парсим его и записываем данные в переменные
@@ -191,17 +196,21 @@ int main(int argc, char *argv[]) {
 
         // Читаем данные из JSON и записываем их в переменные
         PinJson.svfGen(PinJson.filename_json);
+        
+        // Подробный вывод информации о данных принятых ПО и выведенных в файл
+        if(PinJson.verbose == 1){
 
-        // Тестовый вывод пинов из json-файла
-        PinJson.print_json(PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf, 
+            // Тестовый вывод пинов из json-файла
+            PinJson.print_json(PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf, 
                             PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state);
-
-        // Выводим пины, записанные в JSON-файле
-        PinJson.print_pins();
+            
+            // Выводим пины, записанные в JSON-файле
+            PinJson.print_pins();  
+        } 
 
         // Создаём SVF-файл 
         PinJson.createFile(PinJson.filename_json, register_length_bsdl, PinJson.filename_svf, register_length_instr, opcode_extest, 
-                            cells, PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state, 2);
+                            cells, PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state, PinJson.verbose, 2);
 
     } catch (const std::exception& e) {
         

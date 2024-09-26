@@ -15,13 +15,14 @@ class PinJson {
 public:
 
     // Объявляем переменные получаемые при запуске кода
-    std::string filename_bsdl = "NO FILE";
-    std::string filename_json = "NO FILE";
-    std::string filename_svf = "NO FILE";
+    std::string filename_bsdl = "";
+    std::string filename_json = "";
+    std::string filename_svf = "";
     std::string trst_state = "OFF";
     std::string endir_state = "IDLE";
     std::string enddr_state = "IDLE";
     std::string runtest_state = "100";
+    bool verbose = false;
 
     enum class StatePin {
         HIGH, 
@@ -41,7 +42,7 @@ public:
     void createFile(std::string& filename_json, size_t& register_length_bsdl, std::string filename_svf, 
                     size_t& register_length_instr, std::string& opcode_extest, const std::vector<BsdlPins::PinInfo>& cells,
                     std::string trst_state, std::string endir_state, std::string enddr_state, std::string runtest_state, 
-                    const size_t& out);
+                    const bool verbose, const size_t& out);
 
     // Метод для вывода пинов записываемых в svf-файл
     void print_pins();

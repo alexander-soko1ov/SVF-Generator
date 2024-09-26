@@ -126,19 +126,19 @@ std::string BsdlPins::PinInfo::statePinToString(StatePin state) {
         case StatePin::LOW:
             return "0";
         case StatePin::Z:
-            return "Z";
+            return "z";
         case StatePin::X:
-            return "X";
+            return "x";
         case StatePin::PULL0:
-            return "PULL0";
+            return "pull0";
         case StatePin::PULL1:
-            return "PULL1";
+            return "pull1";
         case StatePin::WEAK0:
-            return "WEAK0";
+            return "weak0";
         case StatePin::WEAK1:
-            return "WEAK1";
+            return "weak1";
         case StatePin::KEEPER:
-            return "KEEPER";
+            return "keeper";
         default:
             return "unknown";
     }
