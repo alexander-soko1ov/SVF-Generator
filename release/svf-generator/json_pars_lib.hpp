@@ -7,7 +7,6 @@
 #include <gmpxx.h>
 
 #include "pininfo_lib.hpp"
-// #include "svf-gen_lib.hpp"
 
 
 class PinJson{
@@ -29,8 +28,7 @@ public:
 
         static StatePin string_to_statepin(const std::string& value);
         static std::string statepin_to_string(StatePin state);  
-    };
-    
+    };  
 
     // Подключаем пространство имен nlohmann/json
     using json = nlohmann::json;
@@ -54,12 +52,6 @@ protected:
     // Методы читающие и обрабатывающие JSON
     json read_json_file(const std::string& filename);
     void process_json(const json& jfile);
-
-    // Вектор для хранения данных о пинах, передаваемых как аргументы для svf-файла
-    // std::vector<std::vector<PinsJsonInfo>> pins_svf; 
-
-    // static StatePin string_to_statepin(const std::string& value);
-    // static std::string statepin_to_string(StatePin state);
 
     // Переменные для определения ANSI escape-кодов
     // Сброс всех атрибутов

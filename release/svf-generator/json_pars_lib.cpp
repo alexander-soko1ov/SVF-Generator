@@ -110,25 +110,36 @@ void PinJson::process_json(const json& jfile) {
         const auto& read_values = item["read"];
         const auto& write_values = item["write"]; 
 
-        // Подсчет количества элементов в массиве
-        size_t num_pins = pin_names.size();
-        // std::cerr << "num_pins:  " << num_pins << std::endl;  
-
-        // std::cerr << red << "index   " << index << reset << std::endl;
-
-        for (size_t i = 0; i < num_pins; ++i) {
+        for (size_t i = 0; i < pin_names.size(); ++i) {
 
             pin.pin_name = pin_names[i];
-            pin.cell_read = PinsJsonInfo::string_to_statepin(read_values[i]);
-            pin.cell_write = PinsJsonInfo::string_to_statepin(write_values[i]);
+            
+            if (PinsJsonInfo::string_to_statepin(read_values[i]) == PinsJsonInfo::StatePin::HIGH ||
+                PinsJsonInfo::string_to_statepin(read_values[i]) == PinsJsonInfo::StatePin::LOW ||
+                PinsJsonInfo::string_to_statepin(read_values[i]) == PinsJsonInfo::StatePin::X){
+                
+                pin.cell_read = PinsJsonInfo::string_to_statepin(read_values[i]);
+            } else {
+                std::cerr << red << "Неверное состояние pin read! Допустимые: 1, 0, x" << reset << std::endl;
+                abort();
+            }
+
+            if (PinsJsonInfo::string_to_statepin(write_values[i]) == PinsJsonInfo::StatePin::HIGH ||
+                PinsJsonInfo::string_to_statepin(write_values[i]) == PinsJsonInfo::StatePin::LOW ||
+                PinsJsonInfo::string_to_statepin(write_values[i]) == PinsJsonInfo::StatePin::Z){
+                
+                pin.cell_write = PinsJsonInfo::string_to_statepin(write_values[i]);
+            } else {
+                std::cerr << red << "Неверное состояние pin write! Допустимые: 1, 0, z" << reset << std::endl;
+                abort();
+            }
 
             // std::cerr << "pin_name:     " << pin.pin_name << std::endl;
-            // std::cerr << "cell_read:    " << statepin_to_string(pin.cell_read ) << std::endl;
-            // std::cerr << "cell_write:   " << statepin_to_string(pin.cell_write) << std::endl << std::endl; 
+            // std::cerr << "cell_read:    " << PinsJsonInfo::statepin_to_string(pin.cell_read) << std::endl;
+            // std::cerr << "cell_write:   " << PinsJsonInfo::statepin_to_string(pin.cell_write) << std::endl << std::endl; 
 
             pins_svf[index].push_back(pin);
-        }
-        index++;
+        } index++;
     }
 }
 
