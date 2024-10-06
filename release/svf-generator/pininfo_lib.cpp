@@ -8,7 +8,7 @@
 #include <string_view> // Подключаем string_view
 #include <unordered_map>
 
-#include "pininfo.hpp"
+#include "pininfo_lib.hpp"
 
 // Функция для преобразования str в bool 
 bool BsdlPins::stringToBool(const std::string& str) {

@@ -2,7 +2,7 @@
 #include <fstream>
 #include <getopt.h>  
 
-#include "svf-calculator.hpp"
+#include "svf-calc_lib.hpp"
 
 void JsonForm::fileForm(std::vector<std::vector<std::string>> &pinsList, std::vector<std::vector<std::string>> &writeStatusList, 
                         std::vector<std::vector<std::string>> &readStatusList, std::string &filename){
