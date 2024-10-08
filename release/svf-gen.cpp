@@ -1,8 +1,9 @@
 #include <iostream>
 #include <getopt.h>
 
-#include "pininfo.hpp"
-#include "svf-generator.hpp"
+#include "pininfo_lib.hpp"
+#include "json_pars_lib.hpp"
+#include "svf-gen_lib.hpp"
 
 // Переменные для определения ANSI escape-кодов
 // Сброс всех атрибутов
@@ -51,6 +52,7 @@ bool is_valid_state(const std::string& state, const std::string valid_states[], 
 //     }
 //     return false;
 // }
+
 bool has_extension(const std::string& filename, const std::unordered_set<std::string>& validExtensions) {
     size_t pos = filename.rfind('.');
     if (pos == std::string::npos || pos == filename.length() - 1) {
@@ -70,7 +72,7 @@ void parse_arguments(int argc, char *argv[], std::string& filename_bsdl,
     int option_index = 0;
     int c;
 
-    PinJson PinJson;
+    PinSVF PinSVF;
 
     // Инициализация доступных аргументов
     static struct option long_options[] = {
@@ -168,25 +170,27 @@ void parse_arguments(int argc, char *argv[], std::string& filename_bsdl,
 int main(int argc, char *argv[]) {
     
     // Создаём экземляры класса
+    PinSVF PinSVF;
     PinJson PinJson;
     BsdlPins BsdlPins;
+    
 
     // Создаём vector для хранения и передачи имён файлов
-    parse_arguments(argc, argv, PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf,
-                    PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.verbose, PinJson.runtest_state);
+    parse_arguments(argc, argv, PinSVF.filename_bsdl, PinSVF.filename_json, PinSVF.filename_svf,
+                    PinSVF.trst_state, PinSVF.endir_state, PinSVF.enddr_state, PinSVF.verbose, PinSVF.runtest_state);
 
     try {
         // Загружаем BSDL-файл, парсим его и записываем данные в переменные
-        BsdlPins.loadBsdl(PinJson.filename_bsdl);
+        BsdlPins.loadBsdl(PinSVF.filename_bsdl);
 
         // Получаем данные о длине регистра BSDL
-        size_t register_length_bsdl = BsdlPins.boundaryLength(PinJson.filename_bsdl);
+        size_t register_length_bsdl = BsdlPins.boundaryLength(PinSVF.filename_bsdl);
 
         // Получаем данные о длине регистра BSDL
-        size_t register_length_instr = BsdlPins.instructionLength(PinJson.filename_bsdl);
+        size_t register_length_instr = BsdlPins.instructionLength(PinSVF.filename_bsdl);
 
         // Получаем данные о коде для запуска EXTEST
-        std::string opcode_extest = BsdlPins.opcodeEXTEST(PinJson.filename_bsdl, register_length_instr);
+        std::string opcode_extest = BsdlPins.opcodeEXTEST(PinSVF.filename_bsdl, register_length_instr);
 
         // Получаем вектор пинов
         const std::vector<BsdlPins::PinInfo>& cells = BsdlPins.getCells();
@@ -195,22 +199,27 @@ int main(int argc, char *argv[]) {
         }
 
         // Читаем данные из JSON и записываем их в переменные
-        PinJson.svfGen(PinJson.filename_json);
-        
+        PinJson.read_proc_Json(PinSVF.filename_json);
+
+        const std::vector<std::vector<PinJson::PinsJsonInfo>>& pins_svf = PinJson.getPins();
+        if (pins_svf.empty()) {
+            throw std::runtime_error("Вектор пинов в файле JSON пуст");
+        }
+
         // Подробный вывод информации о данных принятых ПО и выведенных в файл
-        if(PinJson.verbose == 1){
+        if(PinSVF.verbose == 1){
 
             // Тестовый вывод пинов из json-файла
-            PinJson.print_json(PinJson.filename_bsdl, PinJson.filename_json, PinJson.filename_svf, 
-                            PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state);
+            PinSVF.print_param_cli(PinSVF.filename_bsdl, PinSVF.filename_json, PinSVF.filename_svf, 
+                            PinSVF.trst_state, PinSVF.endir_state, PinSVF.enddr_state, PinSVF.runtest_state);
             
             // Выводим пины, записанные в JSON-файле
             PinJson.print_pins();  
         } 
 
         // Создаём SVF-файл 
-        PinJson.createFile(PinJson.filename_json, register_length_bsdl, PinJson.filename_svf, register_length_instr, opcode_extest, 
-                            cells, PinJson.trst_state, PinJson.endir_state, PinJson.enddr_state, PinJson.runtest_state, PinJson.verbose, 2);
+        PinSVF.createFile(pins_svf, PinSVF.filename_json, register_length_bsdl, PinSVF.filename_svf, register_length_instr, opcode_extest, 
+                            cells, PinSVF.trst_state, PinSVF.endir_state, PinSVF.enddr_state, PinSVF.runtest_state, PinSVF.verbose, 2);
 
     } catch (const std::exception& e) {
         

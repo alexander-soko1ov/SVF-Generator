@@ -1,7 +1,7 @@
 #include <iostream>
 #include <getopt.h>  
 
-#include "svf-calculator.hpp"
+#include "svf-calc_lib.hpp"
 
 using json = nlohmann::json;
 

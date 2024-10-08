@@ -55,60 +55,52 @@ endif()
 # Добавляем директорию с исходниками
 include_directories(${CMAKE_SOURCE_DIR})
 
-# Создаем библиотеки
-add_library(svf-generator STATIC
-    svf-generator.cpp
-    svf-generator.hpp
+# Создаем библиотеку svf-gen_lib из исходных файлов
+add_library(svf-gen_lib STATIC
+    svf-gen_lib.cpp
+    svf-gen_lib.hpp
 )
 
-# Создаем библиотеку pininfo из исходных файлов
-add_library(pininfo STATIC
-    pininfo.cpp
-    pininfo.hpp
+# Создаем библиотеку pininfo_lib из исходных файлов
+add_library(pininfo_lib STATIC
+    pininfo_lib.cpp
+    pininfo_lib.hpp
 )
 
-# Создаем библиотеку svf-calculator из исходных файлов
-add_library(svf-calculator STATIC
-    svf-calculator.cpp
-    svf-calculator.hpp
+# Создаем библиотеку svf-calc_lib из исходных файлов
+add_library(svf-calc_lib STATIC
+    svf-calc_lib.cpp
+    svf-calc_lib.hpp
 )
 
+# Создаем библиотеку json_pars_lib из исходных файлов
+add_library(json_pars_lib STATIC
+    json_pars_lib.cpp
+    json_pars_lib.hpp
+)
+
+# Связываем библиотеки json_pars_lib и svf-gen_lib
+# target_link_libraries(json_pars_lib PUBLIC svf-gen_lib)
+target_link_libraries(svf-gen_lib PUBLIC json_pars_lib)
+
+# Работа с файлом svf-gen
 # Создаем исполняемый файл svf-gen
 add_executable(svf-gen
     svf-gen.cpp
 )
 
-# Связываем библиотеки с исполняемым файлом svf-gen
-target_link_libraries(svf-gen PRIVATE svf-generator pininfo gmp gmpxx)
+# Связываем библиотеки svf-gen_lib pininfo_lib json_pars_lib с исполняемым файлом svf-gen
+target_link_libraries(svf-gen PRIVATE pininfo_lib svf-gen_lib gmp gmpxx)
 
 # Устанавливаем опции компилятора для svf-gen
 target_compile_options(svf-gen PRIVATE -g3 -O3)
 
+
+# Работа с файлом svf-calc
 # Создаем исполняемый файл svf-calc
 add_executable(svf-calc
     svf-calc.cpp
 )
 
 # Связываем библиотеки с исполняемым файлом svf-calc
-target_link_libraries(svf-calc PRIVATE svf-calculator)
-
-# Устанавливаем опции компилятора для svf-calc
-target_compile_options(svf-calc PRIVATE -g3 -O3)
-
-# Генерация отчета покрытия кода с использованием lcov и gcov
-if(ENABLE_TEST_COVERAGE)
-    find_program(LCOV_EXECUTABLE lcov)
-    find_program(GENHTML_EXECUTABLE genhtml)
-
-    if(LCOV_EXECUTABLE AND GENHTML_EXECUTABLE)
-        add_custom_target(coverage
-            COMMAND ${LCOV_EXECUTABLE} --capture --directory . --output-file coverage.info
-            COMMAND ${LCOV_EXECUTABLE} --remove coverage.info '/usr/*' --output-file coverage_filtered.info
-            COMMAND ${GENHTML_EXECUTABLE} coverage_filtered.info --output-directory coverage_report
-            COMMENT "Generating coverage report..."
-            VERBATIM
-        )
-    else()
-        message(WARNING "lcov or genhtml not found. Coverage report generation disabled.")
-    endif()
-endif()
+target_link_libraries(svf-calc PRIVATE svf-calc_lib)
